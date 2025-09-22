@@ -69,7 +69,7 @@ export default function Hero() {
                           key={i}
                           className={`relative pl-7 pb-4 ${i !== arr.length - 1 ? "border-l border-dashed border-slate-300" : ""}`}
                         >
-                          <span className="absolute -left-2 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">
+                          <span className="absolute -left-2.5 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">
                             {i + 1}
                           </span>
                           <div className="text-sm text-slate-700">{s.title}</div>
@@ -113,7 +113,7 @@ export default function Hero() {
                           key={i}
                           className={`relative pl-7 pb-4 ${i !== arr.length - 1 ? "border-l border-[hsl(var(--brand))]" : ""}`}
                         >
-                          <span className="absolute -left-2 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-[10px] font-semibold text-white">
+                          <span className="absolute -left-2.5 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-[10px] font-semibold text-white">
                             {i + 1}
                           </span>
                           <div className="text-sm font-medium text-slate-800">{s.title}</div>
