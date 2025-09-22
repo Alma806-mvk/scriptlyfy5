@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Shield, Zap } from "lucide-react";
+import { Shield, Zap, ChevronDown } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -85,6 +85,11 @@ export default function Hero() {
                               ))}
                             </div>
                           ) : null}
+                          {i !== arr.length - 1 ? (
+                            <span className="pointer-events-none absolute -left-[6px] bottom-0 translate-y-1">
+                              <ChevronDown className="h-3 w-3 text-slate-300" />
+                            </span>
+                          ) : null}
                         </li>
                       ))}
                     </ol>
@@ -128,6 +133,11 @@ export default function Hero() {
                                 </span>
                               ))}
                             </div>
+                          ) : null}
+                          {i !== arr.length - 1 ? (
+                            <span className="pointer-events-none absolute -left-[6px] bottom-0 translate-y-1">
+                              <ChevronDown className="h-3 w-3 text-[hsl(var(--brand))] opacity-60" />
+                            </span>
                           ) : null}
                         </li>
                       ))}
