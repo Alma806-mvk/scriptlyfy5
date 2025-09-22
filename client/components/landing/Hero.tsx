@@ -102,24 +102,47 @@ export default function Hero() {
                   <div className="text-xs font-semibold text-slate-500">
                     After
                   </div>
-                  <div className="mt-2 space-y-3">
-                    {[
-                      'Hook: "The secret nobody tells you about scaling reels"',
-                      'CTA: "Comment HOOKS for the template"',
-                      'Pattern: "Q&A style with on-screen text"',
-                    ].map((t, i) => (
-                      <div
-                        key={i}
-                        className="rounded-lg border border-slate-200 p-3"
-                      >
-                        <div className="text-xs text-slate-500">
-                          Transcript snippet
-                        </div>
-                        <div className="mt-1 text-sm font-medium text-slate-800">
-                          {t}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="mt-3">
+                    <ol className="space-y-4">
+                      {[
+                        { title: "Enter @handle or channel URL", chips: ["IG", "TikTok", "YouTube"] },
+                        { title: "Scriptlyfy crawls and auto-transcribes latest videos" },
+                        { title: "Get 100 ready-to-use scripts + insights instantly" },
+                      ].map((s, i, arr) => (
+                        <li
+                          key={i}
+                          className={`relative pl-7 pb-4 ${i !== arr.length - 1 ? "border-l border-[hsl(var(--brand))]" : ""}`}
+                        >
+                          <span className="absolute -left-2 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-[10px] font-semibold text-white">
+                            {i + 1}
+                          </span>
+                          <div className="text-sm font-medium text-slate-800">{s.title}</div>
+                          {"chips" in s && Array.isArray((s as any).chips) ? (
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                              {(s as any).chips.map((c: string) => (
+                                <span
+                                  key={c}
+                                  className="inline-flex items-center rounded-full border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-600"
+                                >
+                                  {c}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[11px] font-medium">
+                        &lt;1 min total
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2 py-0.5 text-[11px] font-medium">
+                        100 scripts
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-medium">
+                        Export CSV/PDF
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
