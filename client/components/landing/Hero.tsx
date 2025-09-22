@@ -55,14 +55,47 @@ export default function Hero() {
                   <div className="text-xs font-semibold text-slate-500">
                     Before
                   </div>
-                  <div className="mt-2 space-y-2">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-4 w-full rounded bg-slate-200"
-                      ></div>
-                    ))}
-                    <div className="h-4 w-3/4 rounded bg-slate-200"></div>
+                  <div className="mt-3">
+                    <ol className="space-y-4">
+                      {[
+                        { title: "Copy Reel URL from Instagram/TikTok/YouTube", chips: ["IG", "TikTok", "YouTube"] },
+                        { title: "Open a third-party downloader and paste URL" },
+                        { title: "Download MP4 to your device" },
+                        { title: "Upload video into a transcription tool" },
+                        { title: "Copy results into your notes or sheet" },
+                        { title: "Repeat for every video" },
+                      ].map((s, i, arr) => (
+                        <li
+                          key={i}
+                          className={`relative pl-7 pb-4 ${i !== arr.length - 1 ? "border-l border-dashed border-slate-300" : ""}`}
+                        >
+                          <span className="absolute -left-2 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">
+                            {i + 1}
+                          </span>
+                          <div className="text-sm text-slate-700">{s.title}</div>
+                          {"chips" in s && Array.isArray((s as any).chips) ? (
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                              {(s as any).chips.map((c: string) => (
+                                <span
+                                  key={c}
+                                  className="inline-flex items-center rounded-full border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-600"
+                                >
+                                  {c}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[11px] font-medium">
+                        ~5–8 min/video
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-rose-100 text-rose-800 px-2 py-0.5 text-[11px] font-medium">
+                        Repeat ×100
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="p-5">
