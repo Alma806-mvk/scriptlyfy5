@@ -116,7 +116,7 @@ export default function Hero() {
                       ].map((s, i, arr) => (
                         <li
                           key={i}
-                          className={`relative pl-7 pb-4 ${i !== arr.length - 1 ? "border-l border-[hsl(var(--brand))]" : ""}`}
+                          className={`relative pl-7 pb-4 ${i !== arr.length - 1 ? "border-l border-dashed border-[hsl(var(--brand))]/60" : ""}`}
                         >
                           <span className="absolute -left-2.5 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-[10px] font-semibold text-white">
                             {i + 1}
