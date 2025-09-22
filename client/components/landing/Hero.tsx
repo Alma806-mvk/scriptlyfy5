@@ -86,7 +86,7 @@ export default function Hero() {
                             </div>
                           ) : null}
                           {i !== arr.length - 1 ? (
-                            <span className="pointer-events-none absolute -left-[6px] bottom-0 translate-y-1">
+                            <span className="pointer-events-none absolute -left-[6px] bottom-[-6px]">
                               <ChevronDown className="h-3 w-3 text-slate-300" />
                             </span>
                           ) : null}
@@ -135,7 +135,7 @@ export default function Hero() {
                             </div>
                           ) : null}
                           {i !== arr.length - 1 ? (
-                            <span className="pointer-events-none absolute -left-[6px] bottom-0 translate-y-1">
+                            <span className="pointer-events-none absolute -left-[6px] bottom-[-6px]">
                               <ChevronDown className="h-3 w-3 text-[hsl(var(--brand))] opacity-60" />
                             </span>
                           ) : null}
