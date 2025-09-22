@@ -3,43 +3,67 @@ import { Button } from "@/components/ui/button";
 
 const tiers = [
   {
-    name: "STARTER",
-    price: "$49/mo",
+    name: "Free",
+    price: "$0/mo",
     features: [
-      "500 videos/month",
-      "3 social platforms",
-      "Basic transcripts",
-      "CSV export",
-      "Perfect for creators",
+      "50 credits/month (50 minutes of content)",
+      "1 competitor profile",
+      "Basic transcription",
+      "Email delivery only",
     ],
-    cta: "Get Starter",
+    cta: "Get Started",
     popular: false,
   },
   {
-    name: "GROWTH",
-    price: "$149/mo",
+    name: "Creator",
+    price: "$29/mo",
     features: [
-      "2,000 videos/month",
-      "All platforms",
-      "AI insights",
-      "Team workspace",
-      "Priority support",
-      "Built for agencies",
+      "500 credits/month (500 minutes of content)",
+      "≈ 250 short videos OR 60 long videos",
+      "3 competitor profiles",
+      "Advanced transcription + insights",
+      "CSV exports",
     ],
-    cta: "Start Growth",
+    cta: "Choose Creator",
     popular: true,
   },
   {
-    name: "SCALE",
+    name: "Professional",
+    price: "$99/mo",
+    features: [
+      "2,500 credits/month (2,500 minutes of content)",
+      "≈ 1,250 short videos OR 300 long videos",
+      "10 competitor profiles",
+      "Analytics dashboard + API access",
+      "Priority support",
+    ],
+    cta: "Choose Professional",
+    popular: false,
+  },
+  {
+    name: "Business",
     price: "$299/mo",
     features: [
-      "Unlimited videos",
-      "API access",
-      "Custom integrations",
-      "Dedicated success manager",
-      "Enterprise-ready",
+      "10,000 credits/month (10,000 minutes of content)",
+      "≈ 5,000 short videos OR 1,000 long videos",
+      "50 competitor profiles",
+      "White-label reports + team features",
+      "Account manager",
     ],
-    cta: "Talk to Sales",
+    cta: "Choose Business",
+    popular: false,
+  },
+  {
+    name: "Enterprise",
+    price: "$799/mo",
+    features: [
+      "30,000 credits/month (30,000 minutes of content)",
+      "≈ 15,000 short videos OR 3,000 long videos",
+      "Unlimited profiles",
+      "Custom integrations + dedicated support",
+      "SLA guarantees",
+    ],
+    cta: "Contact Sales",
     popular: false,
   },
 ];
@@ -56,7 +80,7 @@ export default function Pricing() {
           30-day money-back guarantee
         </p>
       </div>
-      <div className="mt-8 grid lg:grid-cols-3 gap-6">
+      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {tiers.map((t) => (
           <div
             key={t.name}
