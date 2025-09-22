@@ -80,8 +80,39 @@ export default function Pricing() {
           30-day money-back guarantee
         </p>
       </div>
-      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {tiers.map((t) => (
+      <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tiers.slice(0, 3).map((t) => (
+          <div
+            key={t.name}
+            className={`rounded-xl border ${t.popular ? "border-[hsl(var(--brand))]" : "border-slate-200"} bg-white p-6 shadow-sm relative`}
+          >
+            {t.popular && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs bg-[hsl(var(--brand))] text-white px-2 py-1 rounded-md shadow">
+                Most Popular
+              </div>
+            )}
+            <div className="text-sm font-semibold text-slate-500">{t.name}</div>
+            <div className="mt-2 text-3xl font-extrabold text-slate-900">
+              {t.price}
+            </div>
+            <ul className="mt-4 space-y-2 text-slate-700">
+              {t.features.map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-emerald-600 mt-0.5" />{" "}
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <a href="#signup" className="inline-block mt-6 w-full">
+              <Button className="w-full bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">
+                {t.cta}
+              </Button>
+            </a>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        {tiers.slice(3).map((t) => (
           <div
             key={t.name}
             className={`rounded-xl border ${t.popular ? "border-[hsl(var(--brand))]" : "border-slate-200"} bg-white p-6 shadow-sm relative`}
