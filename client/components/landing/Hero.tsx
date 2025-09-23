@@ -86,7 +86,7 @@ export default function Hero() {
                             </div>
                           ) : null}
                           {i !== arr.length - 1 ? (
-                            <span className="pointer-events-none absolute left-0 bottom-[-4px] -translate-x-[58%] rotate-45 w-1.5 h-1.5 border-r border-b border-slate-300"></span>
+                            <span className="pointer-events-none absolute left-0 bottom-[-4px] -translate-x-[56%] rotate-45 w-1.5 h-1.5 border-r border-b border-slate-300"></span>
                           ) : null}
                         </li>
                       ))}
@@ -133,7 +133,7 @@ export default function Hero() {
                             </div>
                           ) : null}
                           {i !== arr.length - 1 ? (
-                            <span className="pointer-events-none absolute left-0 bottom-[-4px] -translate-x-[58%] rotate-45 w-1.5 h-1.5 border-r border-b border-[hsl(var(--brand))]/60"></span>
+                            <span className="pointer-events-none absolute left-0 bottom-[-4px] -translate-x-[56%] rotate-45 w-1.5 h-1.5 border-r border-b border-[hsl(var(--brand))]/60"></span>
                           ) : null}
                         </li>
                       ))}
