@@ -3,23 +3,49 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search, PlayCircle } from "lucide-react";
 
-type DemoItem = {
-  id: number;
+// Firestore-style types
+type Platform = "YouTube" | "Instagram" | "TikTok" | "Unknown";
+
+type TranscriptChunk = {
+  ts: number; // seconds from start
   text: string;
-  highlights: string[];
+  highlights?: string[];
 };
 
-type DemoVideo = {
-  id: string;
+type VideoDoc = {
+  id: string; // stable id (videoId)
   title: string;
-  duration: string; // mm:ss or hh:mm:ss
-  transcript: DemoItem[];
+  durationSec: number;
+  publishedAt: string; // ISO
+  stats: { views?: number; likes?: number };
+  transcript: TranscriptChunk[];
 };
 
-type DemoChannel = {
-  platform: "YouTube" | "Instagram" | "TikTok" | "Unknown";
-  videos: DemoVideo[];
+type ChannelDoc = {
+  handle: string; // @vercel
+  platform: Platform;
+  title: string;
+  stats: { followers?: number; videos: number };
+  videos: Record<string, VideoDoc>; // Subcollection map by id
+  videoOrder: string[]; // Sorted newest -> oldest
+  updatedAt: number; // epoch ms
 };
+
+type MockFirestore = {
+  channels: Record<string, ChannelDoc>; // collection "channels"
+};
+
+// Utilities
+function secsToHMS(sec: number) {
+  const s = Math.max(0, Math.floor(sec));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const mm = h ? m : String(Math.floor((s % 3600) / 60));
+  const ss = String(s % 60).padStart(2, "0");
+  return h ? `${h}:${m}:${ss}` : `${mm}:${ss}`;
+}
 
 const SAMPLE_URLS = [
   { label: "YouTube @vercel", url: "https://www.youtube.com/@vercel" },
@@ -27,114 +53,133 @@ const SAMPLE_URLS = [
   { label: "TikTok @cristiano", url: "https://www.tiktok.com/@cristiano" },
 ];
 
-const MOCK_DB: Record<string, DemoChannel> = {
-  "@vercel": {
-    platform: "YouTube",
-    videos: [
-      {
-        id: "yt-1",
-        title: "Ship Faster with Vercel + Next.js",
-        duration: "08:41",
-        transcript: [
-          {
-            id: 1,
-            text:
-              "Welcome back! Today we test three hooks for a 60s tutorial. The second one improves AVD by 19%.",
-            highlights: ["60s tutorial", "AVD by 19%"],
-          },
-          {
-            id: 2,
-            text: "Chapters: 00:00 Hook, 00:07 Setup, 00:40 Demo, 00:55 CTA.",
-            highlights: ["Chapters", "CTA"],
-          },
-          {
-            id: 3,
-            text: "Subscribe for part two where we fix the retention dip at 28 seconds.",
-            highlights: ["retention dip", "28 seconds"],
-          },
-        ],
+// Firestore-like mock database
+const MOCK_DB: MockFirestore = {
+  channels: {
+    "@vercel": {
+      handle: "@vercel",
+      platform: "YouTube",
+      title: "Vercel",
+      stats: { videos: 2, followers: 1000000 },
+      updatedAt: Date.now(),
+      videoOrder: ["vercel-ship-faster", "vercel-edge-functions"],
+      videos: {
+        "vercel-ship-faster": {
+          id: "vercel-ship-faster",
+          title: "Ship Faster with Vercel + Next.js",
+          durationSec: 8 * 60 + 41,
+          publishedAt: "2024-06-11T12:00:00.000Z",
+          stats: { views: 120345, likes: 3800 },
+          transcript: [
+            {
+              ts: 0,
+              text: "Welcome back! Today we test three hooks for a quick tutorial.",
+              highlights: ["three hooks", "tutorial"],
+            },
+            {
+              ts: 7,
+              text: "Chapters: Hook, Setup, Demo, CTA.",
+              highlights: ["Chapters", "CTA"],
+            },
+            {
+              ts: 28,
+              text: "We fix the retention dip at 28 seconds using a mid-roll pattern.",
+              highlights: ["retention dip", "28 seconds"],
+            },
+          ],
+        },
+        "vercel-edge-functions": {
+          id: "vercel-edge-functions",
+          title: "Edge Functions in Production (Guide)",
+          durationSec: 12 * 60 + 3,
+          publishedAt: "2024-02-02T12:00:00.000Z",
+          stats: { views: 80321, likes: 2400 },
+          transcript: [
+            {
+              ts: 0,
+              text: "Edge vs serverless: choose the right runtime.",
+              highlights: ["Edge", "serverless"],
+            },
+            {
+              ts: 40,
+              text: "Stream HTML while fetching to improve TTFB.",
+              highlights: ["Stream HTML", "TTFB"],
+            },
+          ],
+        },
       },
-      {
-        id: "yt-2",
-        title: "Edge Functions in Production (Guide)",
-        duration: "12:03",
-        transcript: [
-          {
-            id: 1,
-            text: "Edge vs serverless: pick the right runtime. We cover cold starts, caching and latency.",
-            highlights: ["Edge", "serverless", "caching", "latency"],
-          },
-          {
-            id: 2,
-            text: "Pro tip: stream HTML while fetching data to avoid TTFB cliffs.",
-            highlights: ["stream HTML", "TTFB"],
-          },
-        ],
+    },
+    "@natgeo": {
+      handle: "@natgeo",
+      platform: "Instagram",
+      title: "National Geographic",
+      stats: { videos: 1, followers: 280000000 },
+      updatedAt: Date.now(),
+      videoOrder: ["natgeo-serengeti-lion-patrol"],
+      videos: {
+        "natgeo-serengeti-lion-patrol": {
+          id: "natgeo-serengeti-lion-patrol",
+          title: "Inside the Serengeti: Lion Patrol",
+          durationSec: 59,
+          publishedAt: "2024-05-10T12:00:00.000Z",
+          stats: { views: 934000, likes: 210000 },
+          transcript: [
+            {
+              ts: 2,
+              text: "Carousel breakdown: 7 slides, 2 hooks, last slide CTA.",
+              highlights: ["7 slides", "CTA"],
+            },
+          ],
+        },
       },
-    ],
-  },
-  "@natgeo": {
-    platform: "Instagram",
-    videos: [
-      {
-        id: "ig-1",
-        title: "Inside the Serengeti: Lion Patrol",
-        duration: "00:59",
-        transcript: [
-          {
-            id: 1,
-            text: "Carousel breakdown: 7 slides, 2 hooks, last slide CTA. Save this for later!",
-            highlights: ["7 slides", "CTA", "Save this"],
-          },
-        ],
+    },
+    "@cristiano": {
+      handle: "@cristiano",
+      platform: "TikTok",
+      title: "Cristiano Ronaldo",
+      stats: { videos: 1, followers: 170000000 },
+      updatedAt: Date.now(),
+      videoOrder: ["cr7-training-day"],
+      videos: {
+        "cr7-training-day": {
+          id: "cr7-training-day",
+          title: "Training Day Routine",
+          durationSec: 30,
+          publishedAt: "2024-03-20T12:00:00.000Z",
+          stats: { views: 4200000, likes: 900000 },
+          transcript: [
+            {
+              ts: 0,
+              text: "Loop your last two seconds to improve completion rate.",
+              highlights: ["Loop", "completion rate"],
+            },
+          ],
+        },
       },
-    ],
-  },
-  "@cristiano": {
-    platform: "TikTok",
-    videos: [
-      {
-        id: "tt-1",
-        title: "Training Day Routine",
-        duration: "00:30",
-        transcript: [
-          {
-            id: 1,
-            text: "Loop your last two seconds to improve completion rate. Here's how...",
-            highlights: ["Loop", "completion rate"],
-          },
-        ],
-      },
-    ],
+    },
   },
 };
 
-const BASE_TRANSCRIPTS: DemoItem[] = [
-  {
-    id: 1,
-    text:
-      "Okay, here's the hook formula we used to 10x our reels. Keep watching for the template...",
-    highlights: ["hook formula", "10x our reels", "template"],
+// Minimal query helpers to mimic Firestore reads
+const db = {
+  getChannel(handle: string): ChannelDoc | null {
+    return MOCK_DB.channels[handle] || null;
   },
-  {
-    id: 2,
-    text:
-      "Comment 'HOOKS' and we'll send you the exact opener lines that boosted retention.",
-    highlights: ["Comment 'HOOKS'", "opener lines", "retention"],
+  listVideos(handle: string): VideoDoc[] {
+    const c = this.getChannel(handle);
+    if (!c) return [];
+    return c.videoOrder.map((id) => c.videos[id]).filter(Boolean);
   },
-  {
-    id: 3,
-    text:
-      "We post 3 times a day, and here's why cadence + consistent CTAs matter.",
-    highlights: ["3 times a day", "cadence", "CTAs"],
+  getVideo(handle: string, id: string): VideoDoc | null {
+    return this.getChannel(handle)?.videos[id] || null;
   },
-];
+};
 
-function detectPlatform(input: string) {
-  if (/youtube\.com|youtu\.be/i.test(input)) return "YouTube" as const;
-  if (/instagram\.com/i.test(input)) return "Instagram" as const;
-  if (/tiktok\.com/i.test(input)) return "TikTok" as const;
-  return "Unknown" as const;
+function detectPlatform(input: string): Platform {
+  if (/youtube\.com|youtu\.be/i.test(input)) return "YouTube";
+  if (/instagram\.com/i.test(input)) return "Instagram";
+  if (/tiktok\.com/i.test(input)) return "TikTok";
+  return "Unknown";
 }
 
 function parseHandle(input: string): string | null {
@@ -150,43 +195,28 @@ function parseHandle(input: string): string | null {
 export default function Demo() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [channel, setChannel] = useState<DemoChannel | null>(null);
+  const [handle, setHandle] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const platform = useMemo(() => detectPlatform(url), [url]);
   const isValid = /^(https?:\/\/).+\..+/.test(url);
-  const handle = useMemo(() => parseHandle(url), [url]);
+  const platform = useMemo(() => detectPlatform(url), [url]);
+  const parsedHandle = useMemo(() => parseHandle(url), [url]);
 
-  const selectedVideo = useMemo(() => {
-    if (!channel || !selectedId) return null;
-    return channel.videos.find((v) => v.id === selectedId) || null;
-  }, [channel, selectedId]);
+  const channel = useMemo(() => (handle ? db.getChannel(handle) : null), [handle]);
+  const videos = useMemo(() => (handle ? db.listVideos(handle) : []), [handle]);
+  const selectedVideo = useMemo(
+    () => (handle && selectedId ? db.getVideo(handle, selectedId) : null),
+    [handle, selectedId],
+  );
 
   const handleTry = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSelectedId(null);
-
     setTimeout(() => {
-      const h = handle;
-      if (h && MOCK_DB[h]) {
-        setChannel(MOCK_DB[h]);
-      } else {
-        // Fallback demo channel with generic samples
-        setChannel({
-          platform,
-          videos: [
-            {
-              id: "generic-1",
-              title: "Demo Sample Video",
-              duration: "01:02",
-              transcript: BASE_TRANSCRIPTS,
-            },
-          ],
-        });
-      }
+      setHandle(parsedHandle);
       setLoading(false);
-    }, 600);
+    }, 500);
   };
 
   return (
@@ -198,9 +228,10 @@ export default function Demo() {
               Interactive Product Preview
             </h2>
             <Badge variant="secondary">Demo mode</Badge>
+            <Badge className="bg-slate-900 text-white">Firestore-style</Badge>
           </div>
           <p className="mt-3 text-slate-600">
-            Simulated database. Paste a profile URL or try a sample.
+            Simulated Firestore schema: channels/{handle}/videos/{videoId} with transcripts.
           </p>
           <form onSubmit={handleTry} className="mt-4 flex flex-col sm:flex-row gap-3">
             <input
@@ -242,14 +273,16 @@ export default function Demo() {
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {loading ? (
               <div className="flex items-center gap-3 text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" /> Building demo index...
+                <Loader2 className="h-4 w-4 animate-spin" /> Querying channels...
               </div>
             ) : channel ? (
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <div className="mb-2 text-sm text-slate-600">Videos ({channel.videos.length})</div>
+                  <div className="mb-2 text-sm text-slate-600">
+                    {channel.title} • {channel.platform} • Videos ({videos.length})
+                  </div>
                   <ul className="space-y-2">
-                    {channel.videos.map((v) => (
+                    {videos.map((v) => (
                       <li key={v.id}>
                         <button
                           type="button"
@@ -261,26 +294,29 @@ export default function Demo() {
                           <div className="flex items-center gap-2">
                             <PlayCircle className="h-4 w-4 text-slate-500" />
                             <span className="font-medium text-slate-900">{v.title}</span>
-                            <span className="ml-auto text-xs text-slate-500">{v.duration}</span>
+                            <span className="ml-auto text-xs text-slate-500">{secsToHMS(v.durationSec)}</span>
+                          </div>
+                          <div className="mt-0.5 text-xs text-slate-500">
+                            {new Date(v.publishedAt).toLocaleDateString()} • {v.stats.views?.toLocaleString()} views
                           </div>
                         </button>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="min-h-[220px]">
+                <div className="min-h-[240px]">
                   {selectedVideo ? (
                     <div className="space-y-3">
-                      {selectedVideo.transcript.map((r) => (
-                        <div key={r.id} className="rounded-lg border border-slate-200 p-3">
-                          <div className="text-xs text-slate-500">Transcript</div>
+                      {selectedVideo.transcript.map((c, i) => (
+                        <div key={i} className="rounded-lg border border-slate-200 p-3">
+                          <div className="text-xs text-slate-500">{secsToHMS(c.ts)}</div>
                           <p className="mt-1 text-slate-800">
-                            {r.text
-                              .split(new RegExp(`(${r.highlights.map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"))
-                              .map((chunk, i) => (
+                            {c.text
+                              .split(new RegExp(`(${(c.highlights || []).map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"))
+                              .map((chunk, j) => (
                                 <span
-                                  key={i}
-                                  className={r.highlights.some((h) => new RegExp(h, "i").test(chunk)) ? "bg-yellow-200/60 rounded px-1" : ""}
+                                  key={j}
+                                  className={(c.highlights || []).some((h) => new RegExp(h, "i").test(chunk)) ? "bg-yellow-200/60 rounded px-1" : ""}
                                 >
                                   {chunk}
                                 </span>
@@ -302,7 +338,7 @@ export default function Demo() {
               </div>
             )}
           </div>
-          <p className="mt-2 text-xs text-slate-500">Read-only demo. Data is mocked; export is disabled.</p>
+          <p className="mt-2 text-xs text-slate-500">Read-only demo. Schema mirrors Firestore structure.</p>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -331,7 +367,7 @@ export default function Demo() {
           </ul>
           <div className="mt-4 text-xs text-slate-500">
             <div>Mode: <span className="font-medium">{platform}</span></div>
-            <div>These results are simulated for demo purposes.</div>
+            <div>These results are simulated with a Firestore-like schema.</div>
           </div>
         </div>
       </div>
