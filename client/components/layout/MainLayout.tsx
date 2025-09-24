@@ -10,7 +10,7 @@ export function Header() {
     <header className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/90 border-b border-slate-200">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="Scriptlyfy" className="h-8 w-8 rounded-md object-cover shadow-sm" />
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=128" alt="Scriptlyfy" className="h-8 w-8 object-contain bg-transparent" />
           <span className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">
             Scriptlyfy
           </span>
@@ -50,7 +50,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
         <div>
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Scriptlyfy" className="h-8 w-8 rounded-md object-cover shadow-sm" />
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=128" alt="Scriptlyfy" className="h-8 w-8 object-contain bg-transparent" />
             <span className="text-lg font-semibold tracking-tight text-slate-900">
               Scriptlyfy
             </span>
