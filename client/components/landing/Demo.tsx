@@ -202,7 +202,10 @@ export default function Demo() {
   const platform = useMemo(() => detectPlatform(url), [url]);
   const parsedHandle = useMemo(() => parseHandle(url), [url]);
 
-  const channel = useMemo(() => (handle ? db.getChannel(handle) : null), [handle]);
+  const channel = useMemo(
+    () => (handle ? db.getChannel(handle) : null),
+    [handle],
+  );
   const videos = useMemo(() => (handle ? db.listVideos(handle) : []), [handle]);
   const selectedVideo = useMemo(
     () => (handle && selectedId ? db.getVideo(handle, selectedId) : null),
@@ -231,9 +234,13 @@ export default function Demo() {
             <Badge className="bg-slate-900 text-white">Firestore-style</Badge>
           </div>
           <p className="mt-3 text-slate-600">
-            Simulated Firestore schema: channels/{"{"}handle{"}"}/videos/{"{"}videoId{"}"} with transcripts.
+            Simulated Firestore schema: channels/{"{"}handle{"}"}/videos/{"{"}
+            videoId{"}"} with transcripts.
           </p>
-          <form onSubmit={handleTry} className="mt-4 flex flex-col sm:flex-row gap-3">
+          <form
+            onSubmit={handleTry}
+            className="mt-4 flex flex-col sm:flex-row gap-3"
+          >
             <input
               type="url"
               required
@@ -249,7 +256,10 @@ export default function Demo() {
               disabled={!isValid || loading}
             >
               {loading ? (
-                <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Processing</span>
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Processing
+                </span>
               ) : (
                 "Extract"
               )}
@@ -273,13 +283,15 @@ export default function Demo() {
           <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {loading ? (
               <div className="flex items-center gap-3 text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" /> Querying channels...
+                <Loader2 className="h-4 w-4 animate-spin" /> Querying
+                channels...
               </div>
             ) : channel ? (
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <div className="mb-2 text-sm text-slate-600">
-                    {channel.title} • {channel.platform} • Videos ({videos.length})
+                    {channel.title} • {channel.platform} • Videos (
+                    {videos.length})
                   </div>
                   <ul className="space-y-2">
                     {videos.map((v) => (
@@ -288,16 +300,23 @@ export default function Demo() {
                           type="button"
                           onClick={() => setSelectedId(v.id)}
                           className={`w-full text-left rounded-lg border px-3 py-2 transition-colors ${
-                            selectedId === v.id ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/5" : "border-slate-200 hover:bg-slate-50"
+                            selectedId === v.id
+                              ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/5"
+                              : "border-slate-200 hover:bg-slate-50"
                           }`}
                         >
                           <div className="flex items-center gap-2">
                             <PlayCircle className="h-4 w-4 text-slate-500" />
-                            <span className="font-medium text-slate-900">{v.title}</span>
-                            <span className="ml-auto text-xs text-slate-500">{secsToHMS(v.durationSec)}</span>
+                            <span className="font-medium text-slate-900">
+                              {v.title}
+                            </span>
+                            <span className="ml-auto text-xs text-slate-500">
+                              {secsToHMS(v.durationSec)}
+                            </span>
                           </div>
                           <div className="mt-0.5 text-xs text-slate-500">
-                            {new Date(v.publishedAt).toLocaleDateString()} • {v.stats.views?.toLocaleString()} views
+                            {new Date(v.publishedAt).toLocaleDateString()} •{" "}
+                            {v.stats.views?.toLocaleString()} views
                           </div>
                         </button>
                       </li>
@@ -308,15 +327,31 @@ export default function Demo() {
                   {selectedVideo ? (
                     <div className="space-y-3">
                       {selectedVideo.transcript.map((c, i) => (
-                        <div key={i} className="rounded-lg border border-slate-200 p-3">
-                          <div className="text-xs text-slate-500">{secsToHMS(c.ts)}</div>
+                        <div
+                          key={i}
+                          className="rounded-lg border border-slate-200 p-3"
+                        >
+                          <div className="text-xs text-slate-500">
+                            {secsToHMS(c.ts)}
+                          </div>
                           <p className="mt-1 text-slate-800">
                             {c.text
-                              .split(new RegExp(`(${(c.highlights || []).map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"))
+                              .split(
+                                new RegExp(
+                                  `(${(c.highlights || []).map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+                                  "i",
+                                ),
+                              )
                               .map((chunk, j) => (
                                 <span
                                   key={j}
-                                  className={(c.highlights || []).some((h) => new RegExp(h, "i").test(chunk)) ? "bg-yellow-200/60 rounded px-1" : ""}
+                                  className={
+                                    (c.highlights || []).some((h) =>
+                                      new RegExp(h, "i").test(chunk),
+                                    )
+                                      ? "bg-yellow-200/60 rounded px-1"
+                                      : ""
+                                  }
                                 >
                                   {chunk}
                                 </span>
@@ -334,15 +369,20 @@ export default function Demo() {
               </div>
             ) : (
               <div className="flex items-center gap-3 text-slate-500">
-                <Search className="h-4 w-4" /> Paste a profile URL to preview transcripts
+                <Search className="h-4 w-4" /> Paste a profile URL to preview
+                transcripts
               </div>
             )}
           </div>
-          <p className="mt-2 text-xs text-slate-500">Read-only demo. Schema mirrors Firestore structure.</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Read-only demo. Schema mirrors Firestore structure.
+          </p>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-slate-900">Why teams love Scriptlyfy</h3>
+          <h3 className="text-lg font-semibold text-slate-900">
+            Why teams love Scriptlyfy
+          </h3>
           <ul className="mt-4 grid sm:grid-cols-2 gap-3 text-slate-700">
             <li className="rounded-lg border border-slate-200 p-3">
               <span className="font-semibold">Bulk Magic</span>
@@ -366,7 +406,9 @@ export default function Demo() {
             </li>
           </ul>
           <div className="mt-4 text-xs text-slate-500">
-            <div>Mode: <span className="font-medium">{platform}</span></div>
+            <div>
+              Mode: <span className="font-medium">{platform}</span>
+            </div>
             <div>These results are simulated with a Firestore-like schema.</div>
           </div>
         </div>
