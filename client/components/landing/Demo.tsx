@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, PlayCircle } from "lucide-react";
 
 type DemoItem = {
   id: number;
@@ -9,11 +9,105 @@ type DemoItem = {
   highlights: string[];
 };
 
+type DemoVideo = {
+  id: string;
+  title: string;
+  duration: string; // mm:ss or hh:mm:ss
+  transcript: DemoItem[];
+};
+
+type DemoChannel = {
+  platform: "YouTube" | "Instagram" | "TikTok" | "Unknown";
+  videos: DemoVideo[];
+};
+
 const SAMPLE_URLS = [
-  { label: "YouTube Channel", url: "https://www.youtube.com/@vercel" },
-  { label: "Instagram Profile", url: "https://www.instagram.com/natgeo/" },
-  { label: "TikTok Profile", url: "https://www.tiktok.com/@cristiano" },
+  { label: "YouTube @vercel", url: "https://www.youtube.com/@vercel" },
+  { label: "Instagram @natgeo", url: "https://www.instagram.com/natgeo/" },
+  { label: "TikTok @cristiano", url: "https://www.tiktok.com/@cristiano" },
 ];
+
+const MOCK_DB: Record<string, DemoChannel> = {
+  "@vercel": {
+    platform: "YouTube",
+    videos: [
+      {
+        id: "yt-1",
+        title: "Ship Faster with Vercel + Next.js",
+        duration: "08:41",
+        transcript: [
+          {
+            id: 1,
+            text:
+              "Welcome back! Today we test three hooks for a 60s tutorial. The second one improves AVD by 19%.",
+            highlights: ["60s tutorial", "AVD by 19%"],
+          },
+          {
+            id: 2,
+            text: "Chapters: 00:00 Hook, 00:07 Setup, 00:40 Demo, 00:55 CTA.",
+            highlights: ["Chapters", "CTA"],
+          },
+          {
+            id: 3,
+            text: "Subscribe for part two where we fix the retention dip at 28 seconds.",
+            highlights: ["retention dip", "28 seconds"],
+          },
+        ],
+      },
+      {
+        id: "yt-2",
+        title: "Edge Functions in Production (Guide)",
+        duration: "12:03",
+        transcript: [
+          {
+            id: 1,
+            text: "Edge vs serverless: pick the right runtime. We cover cold starts, caching and latency.",
+            highlights: ["Edge", "serverless", "caching", "latency"],
+          },
+          {
+            id: 2,
+            text: "Pro tip: stream HTML while fetching data to avoid TTFB cliffs.",
+            highlights: ["stream HTML", "TTFB"],
+          },
+        ],
+      },
+    ],
+  },
+  "@natgeo": {
+    platform: "Instagram",
+    videos: [
+      {
+        id: "ig-1",
+        title: "Inside the Serengeti: Lion Patrol",
+        duration: "00:59",
+        transcript: [
+          {
+            id: 1,
+            text: "Carousel breakdown: 7 slides, 2 hooks, last slide CTA. Save this for later!",
+            highlights: ["7 slides", "CTA", "Save this"],
+          },
+        ],
+      },
+    ],
+  },
+  "@cristiano": {
+    platform: "TikTok",
+    videos: [
+      {
+        id: "tt-1",
+        title: "Training Day Routine",
+        duration: "00:30",
+        transcript: [
+          {
+            id: 1,
+            text: "Loop your last two seconds to improve completion rate. Here's how...",
+            highlights: ["Loop", "completion rate"],
+          },
+        ],
+      },
+    ],
+  },
+};
 
 const BASE_TRANSCRIPTS: DemoItem[] = [
   {
@@ -36,67 +130,6 @@ const BASE_TRANSCRIPTS: DemoItem[] = [
   },
 ];
 
-const YT_TRANSCRIPTS: DemoItem[] = [
-  {
-    id: 1,
-    text:
-      "Today we're testing 3 hooks for a 60s tutorial. The second one improves AVD by 19%.",
-    highlights: ["3 hooks", "60s tutorial", "AVD by 19%"],
-  },
-  {
-    id: 2,
-    text:
-      "Chapters: 00:00 Hook, 00:07 Setup, 00:40 Demo, 00:55 CTA. Pin your best comment.",
-    highlights: ["Chapters", "CTA", "Pin your best comment"],
-  },
-  {
-    id: 3,
-    text:
-      "Subscribe for part 2 where we fix the retention dip at 28 seconds.",
-    highlights: ["Subscribe", "retention dip", "28 seconds"],
-  },
-];
-
-const IG_TRANSCRIPTS: DemoItem[] = [
-  {
-    id: 1,
-    text:
-      "Carousel post breakdown: 7 slides, 2 hooks, last slide CTA. Save this for later!",
-    highlights: ["Carousel", "7 slides", "Save this"],
-  },
-  {
-    id: 2,
-    text:
-      "POV: You run out of ideas. Here are 5 evergreen formats that always work.",
-    highlights: ["POV", "evergreen formats", "always work"],
-  },
-  {
-    id: 3,
-    text: "Comment 'TEMPLATE' and we'll DM you the caption framework.",
-    highlights: ["Comment 'TEMPLATE'", "caption framework"],
-  },
-];
-
-const TT_TRANSCRIPTS: DemoItem[] = [
-  {
-    id: 1,
-    text:
-      "I built an AI that reviews your profile in 30 seconds. Watch this...",
-    highlights: ["AI", "30 seconds", "Watch this"],
-  },
-  {
-    id: 2,
-    text:
-      "Loop your last 2 seconds to improve completion rate. Here's how...",
-    highlights: ["Loop", "completion rate"],
-  },
-  {
-    id: 3,
-    text: "Follow for part 2 where we test different opening sounds.",
-    highlights: ["part 2", "opening sounds"],
-  },
-];
-
 function detectPlatform(input: string) {
   if (/youtube\.com|youtu\.be/i.test(input)) return "YouTube" as const;
   if (/instagram\.com/i.test(input)) return "Instagram" as const;
@@ -104,35 +137,56 @@ function detectPlatform(input: string) {
   return "Unknown" as const;
 }
 
+function parseHandle(input: string): string | null {
+  const m = input.match(/(?:\/|^)@([A-Za-z0-9_.-]+)/);
+  if (m) return `@${m[1]}`;
+  const ig = input.match(/instagram\.com\/(?!p\/)([A-Za-z0-9_.-]+)/i);
+  if (ig) return `@${ig[1]}`;
+  const tt = input.match(/tiktok\.com\/@([A-Za-z0-9_.-]+)/i);
+  if (tt) return `@${tt[1]}`;
+  return null;
+}
+
 export default function Demo() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<DemoItem[]>([]);
+  const [channel, setChannel] = useState<DemoChannel | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const platform = useMemo(() => detectPlatform(url), [url]);
   const isValid = /^(https?:\/\/).+\..+/.test(url);
+  const handle = useMemo(() => parseHandle(url), [url]);
 
-  const getSampleByPlatform = () => {
-    switch (platform) {
-      case "YouTube":
-        return YT_TRANSCRIPTS;
-      case "Instagram":
-        return IG_TRANSCRIPTS;
-      case "TikTok":
-        return TT_TRANSCRIPTS;
-      default:
-        return BASE_TRANSCRIPTS;
-    }
-  };
+  const selectedVideo = useMemo(() => {
+    if (!channel || !selectedId) return null;
+    return channel.videos.find((v) => v.id === selectedId) || null;
+  }, [channel, selectedId]);
 
   const handleTry = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setResults([]);
+    setSelectedId(null);
+
     setTimeout(() => {
-      setResults(getSampleByPlatform());
+      const h = handle;
+      if (h && MOCK_DB[h]) {
+        setChannel(MOCK_DB[h]);
+      } else {
+        // Fallback demo channel with generic samples
+        setChannel({
+          platform,
+          videos: [
+            {
+              id: "generic-1",
+              title: "Demo Sample Video",
+              duration: "01:02",
+              transcript: BASE_TRANSCRIPTS,
+            },
+          ],
+        });
+      }
       setLoading(false);
-    }, 800);
+    }, 600);
   };
 
   return (
@@ -146,14 +200,13 @@ export default function Demo() {
             <Badge variant="secondary">Demo mode</Badge>
           </div>
           <p className="mt-3 text-slate-600">
-            Simulated results. No keys required. Paste any Instagram/TikTok/YouTube URL
-            or try a sample below.
+            Simulated database. Paste a profile URL or try a sample.
           </p>
           <form onSubmit={handleTry} className="mt-4 flex flex-col sm:flex-row gap-3">
             <input
               type="url"
               required
-              placeholder="https://www.instagram.com/username/"
+              placeholder="https://www.youtube.com/@vercel"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="flex-1 h-12 rounded-md border border-slate-300 px-4 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
@@ -186,30 +239,62 @@ export default function Demo() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm min-h-[220px]">
+          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             {loading ? (
               <div className="flex items-center gap-3 text-slate-500">
-                <Loader2 className="h-4 w-4 animate-spin" /> Generating demo transcript...
+                <Loader2 className="h-4 w-4 animate-spin" /> Building demo index...
               </div>
-            ) : results.length ? (
-              <div className="space-y-3">
-                {results.map((r) => (
-                  <div key={r.id} className="rounded-lg border border-slate-200 p-3">
-                    <div className="text-xs text-slate-500">Transcript</div>
-                    <p className="mt-1 text-slate-800">
-                      {r.text
-                        .split(new RegExp(`(${r.highlights.map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"))
-                        .map((chunk, i) => (
-                          <span
-                            key={i}
-                            className={r.highlights.some((h) => new RegExp(h, "i").test(chunk)) ? "bg-yellow-200/60 rounded px-1" : ""}
-                          >
-                            {chunk}
-                          </span>
-                        ))}
-                    </p>
-                  </div>
-                ))}
+            ) : channel ? (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="mb-2 text-sm text-slate-600">Videos ({channel.videos.length})</div>
+                  <ul className="space-y-2">
+                    {channel.videos.map((v) => (
+                      <li key={v.id}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedId(v.id)}
+                          className={`w-full text-left rounded-lg border px-3 py-2 transition-colors ${
+                            selectedId === v.id ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/5" : "border-slate-200 hover:bg-slate-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <PlayCircle className="h-4 w-4 text-slate-500" />
+                            <span className="font-medium text-slate-900">{v.title}</span>
+                            <span className="ml-auto text-xs text-slate-500">{v.duration}</span>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="min-h-[220px]">
+                  {selectedVideo ? (
+                    <div className="space-y-3">
+                      {selectedVideo.transcript.map((r) => (
+                        <div key={r.id} className="rounded-lg border border-slate-200 p-3">
+                          <div className="text-xs text-slate-500">Transcript</div>
+                          <p className="mt-1 text-slate-800">
+                            {r.text
+                              .split(new RegExp(`(${r.highlights.map(h => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i"))
+                              .map((chunk, i) => (
+                                <span
+                                  key={i}
+                                  className={r.highlights.some((h) => new RegExp(h, "i").test(chunk)) ? "bg-yellow-200/60 rounded px-1" : ""}
+                                >
+                                  {chunk}
+                                </span>
+                              ))}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-500 text-sm">
+                      Select a video to preview its transcript
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-3 text-slate-500">
@@ -217,7 +302,7 @@ export default function Demo() {
               </div>
             )}
           </div>
-          <p className="mt-2 text-xs text-slate-500">Export disabled in Demo mode.</p>
+          <p className="mt-2 text-xs text-slate-500">Read-only demo. Data is mocked; export is disabled.</p>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
