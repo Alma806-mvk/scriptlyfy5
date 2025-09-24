@@ -231,7 +231,7 @@ export default function Demo() {
             <Badge className="bg-slate-900 text-white">Firestore-style</Badge>
           </div>
           <p className="mt-3 text-slate-600">
-            Simulated Firestore schema: channels/{handle}/videos/{videoId} with transcripts.
+            Simulated Firestore schema: channels/{"{"}handle{"}"}/videos/{"{"}videoId{"}"} with transcripts.
           </p>
           <form onSubmit={handleTry} className="mt-4 flex flex-col sm:flex-row gap-3">
             <input
