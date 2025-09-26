@@ -1,7 +1,6 @@
 import Hero from "@/components/landing/Hero";
 import TrustBar from "@/components/landing/TrustBar";
 import SocialProof from "@/components/landing/SocialProof";
-import { LogoStrip } from "@/components/landing/social/LogoStrip";
 import Features from "@/components/landing/Features";
 import Demo from "@/components/landing/Demo";
 import Pricing from "@/components/landing/Pricing";
@@ -9,7 +8,6 @@ import FAQ from "@/components/landing/FAQ";
 import Urgency from "@/components/landing/Urgency";
 import LeadForm from "@/components/landing/LeadForm";
 import SEO from "@/components/SEO";
-import { LastUpdated } from "@/lib/contentMeta.tsx";
 import { Testimonials } from "@/components/landing/social/Testimonials";
 
 export default function Index() {
@@ -26,10 +24,7 @@ export default function Index() {
       />
     <div>
       <Hero />
-      <div className="container mx-auto px-4 mt-4"><LastUpdated slug="" /></div>
   <TrustBar />
-  {/* New lightweight logo social proof strip (early user / ecosystem cues) */}
-  <div className="mt-8" data-observe="reveal"><LogoStrip compact /></div>
   <SocialProof />
       <Demo />
       <Features />
