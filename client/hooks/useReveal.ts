@@ -22,10 +22,11 @@ export function useReveal(options?: { rootMargin?: string; threshold?: number })
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
+          const target = entry.target as HTMLElement;
           if (entry.isIntersecting) {
-            const target = entry.target as HTMLElement;
             target.setAttribute('data-in', 'true');
-            observer.unobserve(target); // one-shot
+          } else {
+            target.removeAttribute('data-in');
           }
         });
       },
