@@ -3,20 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256" />
-  <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256" />
-    <link rel="icon" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Performance resource hints: Preconnect to Firebase endpoints to speed up first Firestore interaction -->
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://firebase.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://www.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="//firestore.googleapis.com" />
+    <link rel="dns-prefetch" href="//firebase.googleapis.com" />
+    <link rel="dns-prefetch" href="//www.googleapis.com" />
+  <!-- Unified single PNG favicon & touch icon (user-supplied) -->
+  <link rel="icon" type="image/png" href="/logo-scriptlyfy.png?v=4" />
+  <link rel="apple-touch-icon" href="/logo-scriptlyfy.png?v=4" />
     <meta name="theme-color" content="#0ea5e9" />
-    <meta data-rh="true" property="og:image" content="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=512" />
-    <link rel="icon" type="image/x-icon" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256">
-    <link rel="icon" type="image/png" sizes="48x48" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256">
-    <link rel="manifest" href="/favicons/manifest.webmanifest">
+  <link rel="canonical" href="https://scriptlyfy.com/" />
+    <meta data-rh="true" property="og:image" content="/logo-scriptlyfy.png" />
+  <meta name="description" content="Scriptlyfy bulk-extracts and transcribes Instagram Reels, TikToks, and YouTube videos from any profile. Turn months of content into searchable competitive intelligence in minutes." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Scriptlyfy" />
+  <meta name="twitter:description" content="Bulk-extract and transcribe competitor content. Get 100 ready-to-use scripts + insights in minutes." />
+  <meta name="twitter:image" content="/logo-scriptlyfy.png" />
+  <!-- Duplicate rel=icon tags removed above to reduce ambiguity -->
+  <link rel="manifest" href="/favicons/manifest.webmanifest">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Scriptlyfy">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.builder.io/api/v1/image/assets%2F7ce3162cbcfc49969a45b18cdf9e65df%2F66fed214bed2435b9712380a12dc192c?format=png&width=256">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Scriptlyfy">

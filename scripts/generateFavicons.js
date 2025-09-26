@@ -2,7 +2,7 @@ const favicons = require('favicons');
 const fs = require('fs');
 const path = require('path');
 
-const source = path.resolve(__dirname, '..', 'public', 'logo.png');
+const source = path.resolve(__dirname, '..', 'public', 'logo-scriptlyfy.png');
 const outputDir = path.resolve(__dirname, '..', 'public', 'favicons');
 const config = {
   path: '/favicons/',
@@ -36,6 +36,16 @@ const config = {
   response.images.forEach(img => {
     fs.writeFileSync(path.join(outputDir, img.name), img.contents);
   });
+  // Ensure /public/favicon.ico exists (Google often fetches /favicon.ico)
+  try {
+    const generatedIco = response.images.find(i => i.name === 'favicon.ico');
+    if (generatedIco) {
+      const rootIco = path.resolve(__dirname, '..', 'public', 'favicon.ico');
+      fs.writeFileSync(rootIco, generatedIco.contents);
+    }
+  } catch (e) {
+    console.warn('Could not write root favicon.ico:', e);
+  }
   // write files
   response.files.forEach(f => {
     fs.writeFileSync(path.join(outputDir, f.name), f.contents);

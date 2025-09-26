@@ -1,5 +1,4 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
 // Firebase web configuration (public) — updated to your new project
@@ -15,12 +14,10 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Optional analytics in supported browsers only
-if (typeof window !== "undefined") {
-  isSupported().then((ok) => {
-    if (ok) getAnalytics(app);
-  });
-}
+// Analytics deliberately deferred (see firebaseAnalytics.ts) to avoid pulling
+// analytics code in the first Firestore interaction bundle. This keeps the
+// initial dynamic import (triggered on user intent) slimmer; analytics will be
+// loaded only after a successful conversion or when explicitly requested.
 
 export const db = getFirestore(app);
 export { app };

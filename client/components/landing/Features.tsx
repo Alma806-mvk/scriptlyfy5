@@ -25,7 +25,7 @@ const items = [
 
 export default function Features() {
   return (
-    <section className="container mx-auto px-4 py-16" id="features">
+    <section className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-16 w-full" id="features">
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map((it) => (
           <div

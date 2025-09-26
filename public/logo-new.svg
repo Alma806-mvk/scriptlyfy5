@@ -1,0 +1,32 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="paint0_linear" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+<stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+</linearGradient>
+</defs>
+<!-- Document/clipboard background -->
+<path d="M60 80C60 71.1634 67.1634 64 76 64H324C332.837 64 340 71.1634 340 80V320C340 328.837 332.837 336 324 336H76C67.1634 336 60 328.837 60 320V80Z" fill="none" stroke="url(#paint0_linear)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+<!-- Text lines inside document -->
+<path d="M100 120H200" stroke="url(#paint0_linear)" stroke-width="6" stroke-linecap="round"/>
+<path d="M100 160H200" stroke="url(#paint0_linear)" stroke-width="6" stroke-linecap="round"/>
+<path d="M100 240H260" stroke="url(#paint0_linear)" stroke-width="6" stroke-linecap="round"/>
+
+<!-- Magic wand/pen -->
+<path d="M260 140L340 60L380 100L300 180L260 140Z" fill="url(#paint0_linear)"/>
+<path d="M240 160L260 140L300 180L280 200L240 160Z" fill="url(#paint0_linear)"/>
+
+<!-- Sparkles -->
+<g fill="url(#paint0_linear)">
+<!-- Large sparkle -->
+<path d="M140 60L148 80L168 72L148 88L140 108L132 88L112 72L132 80L140 60Z"/>
+<!-- Medium sparkle -->
+<path d="M320 120L326 134L340 128L326 142L320 156L314 142L300 128L314 134L320 120Z"/>
+<!-- Small sparkle -->
+<path d="M240 200L244 208L252 204L244 212L240 220L236 212L228 204L236 208L240 200Z"/>
+</g>
+
+<!-- Right border accent -->
+<path d="M360 80V320" stroke="url(#paint0_linear)" stroke-width="12" stroke-linecap="round"/>
+</svg>

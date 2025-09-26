@@ -15,6 +15,15 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react","react-dom","react-router-dom"],
+          firebase: ["firebase/app","firebase/firestore"],
+          query: ["@tanstack/react-query"],
+        }
+      }
+    }
   },
   plugins: [react(), expressPlugin()],
   resolve: {

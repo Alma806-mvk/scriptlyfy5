@@ -7,14 +7,20 @@ function isValidEmail(email: string) {
 }
 
 export const handleLead: RequestHandler = async (req, res) => {
-  const { challenge, count, email, company, role, useCase, meta: incomingMeta } = req.body ?? {};
+  const { challenge, count, email, company, role, useCase, referralSource, type, meta: incomingMeta } = req.body ?? {};
   if (!email || typeof email !== "string" || !isValidEmail(email)) {
     return res.status(400).json({ error: "Valid email is required" });
   }
 
+  // Handle referral source updates separately
+  if (type === "referral_update") {
+    console.log("Referral source update:", { email, referralSource });
+    return res.status(200).json({ ok: true });
+  }
+
   try {
     // Everything that is not a known top-level field goes under meta
-    const knownKeys = new Set(["challenge", "count", "email", "company", "role", "useCase", "meta"]);
+    const knownKeys = new Set(["challenge", "count", "email", "company", "role", "useCase", "referralSource", "meta"]);
     const extra: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(req.body ?? {})) {
       if (!knownKeys.has(k)) extra[k] = v as unknown;
@@ -30,6 +36,7 @@ export const handleLead: RequestHandler = async (req, res) => {
       useCase: typeof useCase === "string" ? useCase : String(useCase ?? ""),
       challenge: typeof challenge === "string" ? challenge : String(challenge ?? ""),
       count: typeof count === "string" ? count : String(count ?? ""),
+      referralSource: typeof referralSource === "string" ? referralSource : String(referralSource ?? ""),
       email,
       company: typeof company === "string" ? company : String(company ?? ""),
       meta,
@@ -44,15 +51,15 @@ export const handleLead: RequestHandler = async (req, res) => {
     const dataDir = path.join(process.cwd(), "server", "data");
     const csvPath = path.join(dataDir, "leads.csv");
     await fs.mkdir(dataDir, { recursive: true });
-    const headers = "ts,role,useCase,challenge,count,email,company,meta,ua,ip\n";
+    const headers = "ts,role,useCase,challenge,count,referralSource,email,company,meta,ua,ip\n";
     try {
       await fs.access(csvPath);
     } catch {
       await fs.writeFile(csvPath, headers, "utf8");
     }
     const toCsv = (
-      [lead.ts, lead.role, lead.useCase, lead.challenge, lead.count, lead.email, lead.company, JSON.stringify(lead.meta ?? {}), lead.ua, lead.ip]
-        .map((v) => `"${String(v).replaceAll('"', '""')}"`)
+      [lead.ts, lead.role, lead.useCase, lead.challenge, lead.count, lead.referralSource, lead.email, lead.company, JSON.stringify(lead.meta ?? {}), lead.ua, lead.ip]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
         .join(",") + "\n"
     );
     await fs.appendFile(csvPath, toCsv, "utf8");

@@ -1,11 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Shield, Zap } from "lucide-react";
+import InlineHeroLeadCapture from "@/components/landing/InlineHeroLeadCapture";
+
+// Helper function for smooth scrolling and clean URLs
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+    window.history.pushState({}, '', `/${sectionId}`);
+  }
+};
 
 export default function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_80%_0%,rgba(59,130,246,0.15),transparent),radial-gradient(40%_40%_at_20%_100%,rgba(15,23,42,0.08),transparent)]" />
-      <div className="container mx-auto px-4 pt-8 pb-8 lg:pt-14 lg:pb-12 grid lg:grid-cols-2 gap-10 items-center">
+      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-8 lg:pt-14 lg:pb-12 grid lg:grid-cols-2 gap-12 xl:gap-20 2xl:gap-24 items-center w-full">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--brand))]"></span>
@@ -21,21 +31,22 @@ export default function Hero() {
             searchable competitive intelligence in minutes.
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <a href="#signup">
-              <Button
-                size="lg"
-                className="h-12 px-6 bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
-              >
-                Join the Waitlist
-              </Button>
+            <a
+              href="/signup"
+              onClick={(e) => { e.preventDefault(); scrollToSection('signup'); }}
+              className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
+            >
+              Join the Waitlist
             </a>
             <a
-              href="#demo"
+              href="/demo"
+              onClick={(e) => { e.preventDefault(); scrollToSection('demo'); }}
               className="inline-flex items-center justify-center h-12 px-6 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               See 3-Minute Demo
             </a>
           </div>
+          <InlineHeroLeadCapture />
           <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-600">
             <div className="inline-flex items-center gap-2">
               <Shield className="h-4 w-4 text-emerald-600" />{" "}

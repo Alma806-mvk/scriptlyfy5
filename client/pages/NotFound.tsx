@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import SEO from "@/components/SEO";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,6 +13,17 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
+    <>
+      <SEO
+        title="Page Not Found | Scriptlyfy"
+        description="404 – The page you requested could not be found on Scriptlyfy."
+        canonical={`https://scriptlyfy.com${location.pathname}`}
+        noIndex
+        ogTitle="404 Page Not Found"
+        ogDescription="This page does not exist on Scriptlyfy. Navigate back to the homepage."
+        twitterTitle="404 Page Not Found"
+        twitterDescription="This page does not exist on Scriptlyfy."
+      />
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">404</h1>
@@ -21,6 +33,7 @@ const NotFound = () => {
         </a>
       </div>
     </div>
+    </>
   );
 };
 

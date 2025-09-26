@@ -1,6 +1,15 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Helper function for smooth scrolling and clean URLs
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+    window.history.pushState({}, '', `/${sectionId}`);
+  }
+};
+
 const tiers = [
   {
     name: "Free",
@@ -70,7 +79,7 @@ const tiers = [
 
 export default function Pricing() {
   return (
-    <section className="container mx-auto px-4 py-16" id="pricing">
+    <section className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-16 w-full" id="pricing">
       <div className="text-center max-w-2xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
           Simple Pricing. Massive ROI.
@@ -103,10 +112,12 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <a href="#signup" className="inline-block mt-6 w-full">
-              <Button className="w-full bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">
-                {t.cta}
-              </Button>
+            <a
+              href="/signup"
+              onClick={(e) => { e.preventDefault(); scrollToSection('signup'); }}
+              className="mt-6 inline-flex items-center justify-center w-full h-10 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
+            >
+              {t.cta}
             </a>
           </div>
         ))}
@@ -134,10 +145,12 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <a href="#signup" className="inline-block mt-6 w-full">
-              <Button className="w-full bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">
-                {t.cta}
-              </Button>
+            <a
+              href="/signup"
+              onClick={(e) => { e.preventDefault(); scrollToSection('signup'); }}
+              className="mt-6 inline-flex items-center justify-center w-full h-10 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
+            >
+              {t.cta}
             </a>
           </div>
         ))}

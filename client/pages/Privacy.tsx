@@ -1,5 +1,18 @@
+import SEO from "@/components/SEO";
+
 export default function Privacy() {
   return (
+    <>
+      <SEO
+        title="Privacy Policy | Scriptlyfy"
+        description="Scriptlyfy Privacy Policy – how we collect, use, store and protect your data."
+        canonical="https://scriptlyfy.com/privacy"
+        noIndex
+        ogTitle="Privacy Policy – Scriptlyfy"
+        ogDescription="Understand how Scriptlyfy handles data: collection, usage, retention and your rights."
+        twitterTitle="Scriptlyfy Privacy Policy"
+        twitterDescription="How Scriptlyfy collects, uses and protects user data. Read the full policy."
+      />
     <div className="container mx-auto px-4 py-16">
       <h1 className="text-3xl font-bold tracking-tight text-slate-900">Privacy Policy</h1>
       <p className="mt-2 text-slate-600">Last updated: {new Date().toISOString().slice(0, 10)}</p>
@@ -69,5 +82,6 @@ export default function Privacy() {
         </p>
       </div>
     </div>
+    </>
   );
 }

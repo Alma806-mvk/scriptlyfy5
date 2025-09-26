@@ -10,3 +10,26 @@
 export interface DemoResponse {
   message: string;
 }
+
+export interface LeadCreateRequest {
+  email: string;
+  role: string;
+  useCase: string;
+  challenge: string;
+  count: string;
+  company?: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface LeadReferralUpdateRequest {
+  type: "referral_update";
+  email: string;
+  referralSource: string;
+}
+
+export type LeadApiRequest = LeadCreateRequest | LeadReferralUpdateRequest;
+
+export interface LeadApiResponse {
+  ok?: boolean;
+  error?: string;
+}

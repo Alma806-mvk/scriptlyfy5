@@ -10,7 +10,7 @@
    * Tailwind CSS theme
    * tailwind.config.ts expects the following color variables to be expressed as HSL values.
    * A different format will require also updating the theme in tailwind.config.ts.
-  */
+   */
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -97,6 +97,27 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --brand: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer utilities {
+  /* Reveal animation (progressive enhancement) */
+  [data-observe="reveal"] {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .6s ease, transform .6s ease;
+    will-change: opacity, transform;
+  }
+  [data-observe="reveal"][data-in="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-observe="reveal"] {
+      transition: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 

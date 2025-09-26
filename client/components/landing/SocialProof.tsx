@@ -23,7 +23,7 @@ export default function SocialProof() {
     },
   ];
   return (
-    <section className="container mx-auto px-4 py-16" id="social-proof">
+    <section className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-16 w-full" id="social-proof">
       <h2 className="text-center text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
         Trusted by high-performance marketing teams
       </h2>

@@ -22,7 +22,7 @@ export default function Urgency() {
   }, []);
   const { d, h, m, s } = useCountdown(deadline);
   return (
-    <section className="container mx-auto px-4 py-12" id="urgency">
+    <section className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-12 w-full" id="urgency">
       <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 text-center shadow-sm">
         <div className="text-sm font-semibold text-slate-700">
           Launch Incentives

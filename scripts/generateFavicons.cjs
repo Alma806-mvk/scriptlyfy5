@@ -2,7 +2,7 @@ const favicons = require('favicons');
 const fs = require('fs');
 const path = require('path');
 
-const source = path.resolve(__dirname, '..', 'public', 'logo.png');
+const source = path.resolve(__dirname, '..', 'public', 'logo-scriptlyfy.png');
 const outputDir = path.resolve(__dirname, '..', 'public', 'favicons');
 const config = {
   path: '/favicons/',

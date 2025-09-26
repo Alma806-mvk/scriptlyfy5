@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Leads stored at leads/{email} where {email} is normalized (lowercase trimmed)
+    match /leads/{email} {
+      // Allow create only if a doc with the same id doesn't already exist
+      // and the email field matches the document id (basic integrity check)
+      allow create: if request.resource.data.email == email
+                    && !exists(/databases/$(database)/documents/leads/$(email));
+
+      // Optional: block updates/deletes from clients (server-only if ever needed)
+      allow update, delete: if false;
+
+      // Keep private (no reads from client). If you need reads, set a proper condition or true.
+      allow read: if false;
+
+      // Subcollection for referral answers
+      match /referrals/{refId} {
+        // Allow adding a referral record if parent lead exists
+        allow create: if exists(/databases/$(database)/documents/leads/$(email));
+        allow read, update, delete: if false;
+      }
+    }
+  }
+}

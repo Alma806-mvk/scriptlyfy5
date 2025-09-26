@@ -1,5 +1,18 @@
+import SEO from "@/components/SEO";
+
 export default function Terms() {
   return (
+    <>
+      <SEO
+        title="Terms of Service | Scriptlyfy"
+        description="Scriptlyfy Terms of Service – usage guidelines, acceptable use, rights and limitations."
+        canonical="https://scriptlyfy.com/terms"
+        noIndex
+        ogTitle="Scriptlyfy Terms of Service"
+        ogDescription="Read the full Scriptlyfy Terms: acceptable use, account expectations, liability limits."
+        twitterTitle="Scriptlyfy Terms of Service"
+        twitterDescription="Usage terms, acceptable use and policies governing Scriptlyfy."
+      />
     <div className="container mx-auto px-4 py-16">
       <h1 className="text-3xl font-bold tracking-tight text-slate-900">Terms of Service</h1>
       <p className="mt-2 text-slate-600">Last updated: {new Date().toISOString().slice(0, 10)}</p>
@@ -69,5 +82,6 @@ export default function Terms() {
         </p>
       </div>
     </div>
+    </>
   );
 }
