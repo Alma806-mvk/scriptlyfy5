@@ -111,7 +111,12 @@ export function Footer() {
             <img
               src="/logo-scriptlyfy.png"
               alt="Scriptlyfy"
+              width="32"
+              height="32"
+              sizes="32px"
               className="h-8 w-8 object-contain bg-transparent"
+              loading="lazy"
+              decoding="async"
             />
             <span className="text-lg font-semibold tracking-tight text-slate-900">
               Scriptlyfy
