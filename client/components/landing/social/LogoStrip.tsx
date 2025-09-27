@@ -31,6 +31,9 @@ export const LogoStrip: React.FC<LogoStripProps> = ({ heading = 'Trusted by earl
                 <img
                   src={`/${l.name}`}
                   alt={l.alt}
+                  width={120}
+                  height={40}
+                  sizes="120px"
                   loading="lazy"
                   className="max-h-10 max-w-[120px] object-contain grayscale hover:grayscale-0 transition"
                   decoding="async"
