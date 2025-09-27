@@ -1,7 +1,8 @@
 import { PropsWithChildren } from "react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { Menu, Sparkles } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect } from "react";
 
 // Helper function for smooth scrolling and clean URLs
@@ -16,6 +17,13 @@ export const scrollToSection = (sectionId: string, push: boolean = true) => {
 export function Header() {
   const navLink =
     "text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors";
+  const handleNav = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    id: string,
+  ) => {
+    e.preventDefault();
+    scrollToSection(id);
+  };
   return (
     <header className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/90 border-b border-slate-200">
       <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3 flex items-center justify-between w-full">
@@ -30,46 +38,10 @@ export function Header() {
           </span>
         </a>
         <nav className="hidden md:flex items-center gap-6">
-          <a
-            href="/features"
-            className={navLink}
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("features");
-            }}
-          >
-            Features
-          </a>
-          <a
-            href="/demo"
-            className={navLink}
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("demo");
-            }}
-          >
-            Demo
-          </a>
-          <a
-            href="/pricing"
-            className={navLink}
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("pricing");
-            }}
-          >
-            Pricing
-          </a>
-          <a
-            href="/faq"
-            className={navLink}
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("faq");
-            }}
-          >
-            FAQs
-          </a>
+          <a href="/features" className={navLink} onClick={(e) => handleNav(e, "features")}>Features</a>
+          <a href="/demo" className={navLink} onClick={(e) => handleNav(e, "demo")}>Demo</a>
+          <a href="/pricing" className={navLink} onClick={(e) => handleNav(e, "pricing")}>Pricing</a>
+          <a href="/faq" className={navLink} onClick={(e) => handleNav(e, "faq")}>FAQs</a>
         </nav>
         <div className="hidden md:flex items-center gap-3">
           <Button
@@ -79,9 +51,47 @@ export function Header() {
             Join Early Access
           </Button>
         </div>
-        <button className="md:hidden p-2 text-slate-600" aria-label="Open menu">
-          <Menu className="h-6 w-6" />
-        </button>
+        {/* Mobile menu */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <button className="md:hidden p-2 -m-2 rounded-md text-slate-700 hover:bg-slate-100 active:bg-slate-200" aria-label="Open menu">
+              <Menu className="h-6 w-6" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-5/6 max-w-xs p-0">
+            <nav className="px-5 pt-14 pb-6">
+              <ul className="space-y-1">
+                <li>
+                  <SheetClose asChild>
+                    <a href="/features" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "features")}>Features</a>
+                  </SheetClose>
+                </li>
+                <li>
+                  <SheetClose asChild>
+                    <a href="/demo" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "demo")}>Demo</a>
+                  </SheetClose>
+                </li>
+                <li>
+                  <SheetClose asChild>
+                    <a href="/pricing" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "pricing")}>Pricing</a>
+                  </SheetClose>
+                </li>
+                <li>
+                  <SheetClose asChild>
+                    <a href="/faq" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "faq")}>FAQs</a>
+                  </SheetClose>
+                </li>
+              </ul>
+              <div className="mt-4">
+                <SheetClose asChild>
+                  <Button className="w-full bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90" onClick={() => scrollToSection("signup")}>
+                    Join Early Access
+                  </Button>
+                </SheetClose>
+              </div>
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );
@@ -220,7 +230,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
   }, []);
 
   return (
-    <div className={cn("min-h-dvh bg-white text-slate-900")}>
+    <div className={cn("min-h-dvh bg-white text-slate-900 overflow-x-clip")}>
       {/* Skip link for keyboard users */}
       <a
         href="#main"
