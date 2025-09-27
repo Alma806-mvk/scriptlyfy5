@@ -164,7 +164,7 @@ export default function Hero() {
                 </div>
               </div>
             </div>
-            <div className="absolute -right-8 -bottom-6 rotate-3 rounded-lg bg-white border border-slate-200 shadow-md shadow-slate-900/5 p-3 text-xs w-[220px]">
+            <div className="hidden md:block absolute -right-8 -bottom-6 rotate-3 rounded-lg bg-white border border-slate-200 shadow-md shadow-slate-900/5 p-3 text-xs w-[220px]">
               <div className="font-semibold text-slate-700">
                 Auto-detected Insights
               </div>
