@@ -231,6 +231,12 @@ export default function LeadForm() {
     setLoading(false);
   };
 
+  const isMobile = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
+  const scrollIntoViewOnMobile = (el: HTMLElement | null) => {
+    if (!el || !isMobile) return;
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch {}
+  };
+
   return (
     <section className="container mx-auto px-4 py-16" id="signup">
       <div className="max-w-3xl mx-auto">
@@ -259,6 +265,7 @@ export default function LeadForm() {
                         id="role-select"
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                         className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                       >
                         {[...roles, "Other"].map((r) => (
@@ -268,10 +275,12 @@ export default function LeadForm() {
                       {role === "Other" && (
                         <input
                           id="role-other-input"
-                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                           placeholder="Tell us your role"
                           value={roleOther}
                           onChange={(e) => setRoleOther(e.target.value)}
+                          onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                          enterKeyHint="next"
                         />
                       )}
                     </div>
@@ -281,6 +290,7 @@ export default function LeadForm() {
                         id="goal-select"
                         value={useCase}
                         onChange={(e) => setUseCase(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                         className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                       >
                         {[...goals, "Other"].map((g) => (
@@ -289,12 +299,14 @@ export default function LeadForm() {
                       </select>
                       {useCase === "Other" && (
                         <input
-                          id="goal-other-input"
-                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
-                          placeholder="What's your goal?"
-                          value={useCaseOther}
-                          onChange={(e) => setUseCaseOther(e.target.value)}
-                        />
+                        id="goal-other-input"
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        placeholder="What's your goal?"
+                        value={useCaseOther}
+                        onChange={(e) => setUseCaseOther(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        enterKeyHint="next"
+                      />
                       )}
                     </div>
                   </div>
@@ -313,7 +325,7 @@ export default function LeadForm() {
                         key={opt}
                         type="button"
                         onClick={() => toggleContent(opt)}
-                        className={`h-10 rounded-md border px-3 text-sm text-left ${contentTypes.includes(opt) ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/10" : "border-slate-300"}`}
+                        className={`h-11 rounded-md border px-3 text-sm text-left ${contentTypes.includes(opt) ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/10" : "border-slate-300"}`}
                       >
                         {opt}
                       </button>
@@ -326,6 +338,7 @@ export default function LeadForm() {
                       id="challenge-select"
                       value={challenge}
                       onChange={(e) => setChallenge(e.target.value)}
+                      onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                       className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                     >
                       {[...challenges, "Other"].map((c) => (
@@ -335,10 +348,12 @@ export default function LeadForm() {
                     {challenge === "Other" && (
                       <input
                         id="challenge-other-input"
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                         placeholder="Describe your challenge"
                         value={challengeOther}
                         onChange={(e) => setChallengeOther(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        enterKeyHint="next"
                       />
                     )}
                   </div>
@@ -357,6 +372,7 @@ export default function LeadForm() {
                     id="count-select"
                     value={count}
                     onChange={(e) => setCount(e.target.value)}
+                    onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                     className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                   >
                     {[...sizeBuckets, "Other"].map((c) => (
@@ -377,10 +393,17 @@ export default function LeadForm() {
                     <label htmlFor="handle-or-website" className="block text-sm font-medium text-slate-700">{role === "Business/Brand" ? "Website" : "Primary handle"}</label>
                     <input
                       id="handle-or-website"
+                      name={role === "Business/Brand" ? "url" : "handle"}
+                      inputMode={role === "Business/Brand" ? "url" as const : "text" as const}
+                      autoComplete={role === "Business/Brand" ? "url" : "username"}
+                      autoCapitalize={role === "Business/Brand" ? "none" : "none"}
+                      autoCorrect={role === "Business/Brand" ? "off" : "off"}
                       value={handleOrWebsite}
                       onChange={(e) => setHandleOrWebsite(e.target.value)}
-                      className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                      onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                      className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                       placeholder={role === "Business/Brand" ? "https://acme.com" : "@yourhandle"}
+                      enterKeyHint="next"
                     />
                   </div>
 
@@ -398,13 +421,20 @@ export default function LeadForm() {
                       <label htmlFor="email-input" className="block text-sm font-medium text-slate-700">Email</label>
                       <input
                         type="email"
+                        name="email"
+                        inputMode="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
                         required
                         pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                         id="email-input"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                         placeholder="you@company.com"
+                        enterKeyHint="next"
                       />
                       {email && !validEmail && (
                         <p className="mt-1 text-xs text-red-600">Enter a valid email address</p>
@@ -414,10 +444,14 @@ export default function LeadForm() {
                       <label htmlFor="company-input" className="block text-sm font-medium text-slate-700">Company (optional)</label>
                       <input
                         id="company-input"
+                        name="organization"
+                        autoComplete="organization"
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                         placeholder="Acme Inc"
+                        enterKeyHint="done"
                       />
                     </div>
                   </div>
