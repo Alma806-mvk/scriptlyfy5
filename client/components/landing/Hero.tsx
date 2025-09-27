@@ -15,17 +15,17 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_80%_0%,rgba(59,130,246,0.15),transparent),radial-gradient(40%_40%_at_20%_100%,rgba(15,23,42,0.08),transparent)]" />
-      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-8 lg:pt-14 lg:pb-12 grid lg:grid-cols-2 gap-12 xl:gap-20 2xl:gap-24 items-center w-full">
+      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-8 lg:pt-14 lg:pb-12 grid lg:grid-cols-2 gap-8 md:gap-12 xl:gap-20 2xl:gap-24 items-center w-full">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--brand))]"></span>
             Premium Coming Soon
           </div>
-          <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-slate-900">
+          <h1 className="mt-4 text-balance text-[clamp(1.75rem,6vw,3rem)] lg:text-5xl font-extrabold leading-tight tracking-tight text-slate-900">
             Stop Watching. Start Knowing. Bulk-Transcribe Competitor Content
             Instantly.
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl">
+          <p className="mt-4 text-pretty text-[clamp(0.95rem,2.5vw,1.125rem)] text-slate-600 max-w-2xl">
             Scriptlyfy bulk-extracts and transcribes Instagram Reels, TikToks,
             and YouTube videos from any profile URL. Turn months of content into
             searchable competitive intelligence in minutes.
@@ -34,14 +34,16 @@ export default function Hero() {
             <a
               href="/signup"
               onClick={(e) => { e.preventDefault(); scrollToSection('signup'); }}
-              className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
+              aria-label="Join the waitlist"
+              className="inline-flex w-full sm:w-auto items-center justify-center h-12 px-6 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
             >
               Join the Waitlist
             </a>
             <a
               href="/demo"
               onClick={(e) => { e.preventDefault(); scrollToSection('demo'); }}
-              className="inline-flex items-center justify-center h-12 px-6 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+              aria-label="See 3-minute demo"
+              className="inline-flex w-full sm:w-auto items-center justify-center h-12 px-6 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               See 3-Minute Demo
             </a>
