@@ -6,8 +6,8 @@ import InlineHeroLeadCapture from "@/components/landing/InlineHeroLeadCapture";
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId);
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
-    window.history.pushState({}, '', `/${sectionId}`);
+    element.scrollIntoView({ behavior: "smooth" });
+    window.history.pushState({}, "", `/${sectionId}`);
   }
 };
 
@@ -15,17 +15,17 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_80%_0%,rgba(59,130,246,0.15),transparent),radial-gradient(40%_40%_at_20%_100%,rgba(15,23,42,0.08),transparent)]" />
-      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-8 lg:pt-14 lg:pb-12 grid lg:grid-cols-2 gap-12 xl:gap-20 2xl:gap-24 items-center w-full">
+      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-8 lg:pt-14 lg:pb-12 grid lg:grid-cols-2 gap-8 md:gap-12 xl:gap-20 2xl:gap-24 items-center w-full">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--brand))]"></span>
             Premium Coming Soon
           </div>
-          <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-slate-900">
+          <h1 className="mt-4 text-balance text-[clamp(1.75rem,6vw,3rem)] lg:text-5xl font-extrabold leading-tight tracking-tight text-slate-900">
             Stop Watching. Start Knowing. Bulk-Transcribe Competitor Content
             Instantly.
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl">
+          <p className="mt-4 text-pretty text-[clamp(0.95rem,2.5vw,1.125rem)] text-slate-600 max-w-2xl">
             Scriptlyfy bulk-extracts and transcribes Instagram Reels, TikToks,
             and YouTube videos from any profile URL. Turn months of content into
             searchable competitive intelligence in minutes.
@@ -33,15 +33,23 @@ export default function Hero() {
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <a
               href="/signup"
-              onClick={(e) => { e.preventDefault(); scrollToSection('signup'); }}
-              className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection("signup");
+              }}
+              aria-label="Join the waitlist"
+              className="inline-flex w-full sm:w-auto items-center justify-center h-12 px-6 rounded-md bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90 text-white text-sm font-medium"
             >
               Join the Waitlist
             </a>
             <a
               href="/demo"
-              onClick={(e) => { e.preventDefault(); scrollToSection('demo'); }}
-              className="inline-flex items-center justify-center h-12 px-6 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection("demo");
+              }}
+              aria-label="See 3-minute demo"
+              className="inline-flex w-full sm:w-auto items-center justify-center h-12 px-6 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               See 3-Minute Demo
             </a>
@@ -69,8 +77,13 @@ export default function Hero() {
                   <div className="mt-3">
                     <ol className="space-y-4">
                       {[
-                        { title: "Copy Reel URL from Instagram/TikTok/YouTube", chips: ["IG", "TikTok", "YouTube"] },
-                        { title: "Open a third-party downloader and paste URL" },
+                        {
+                          title: "Copy Reel URL from Instagram/TikTok/YouTube",
+                          chips: ["IG", "TikTok", "YouTube"],
+                        },
+                        {
+                          title: "Open a third-party downloader and paste URL",
+                        },
                         { title: "Download MP4 to your device" },
                         { title: "Upload video into a transcription tool" },
                         { title: "Copy results into your notes or sheet" },
@@ -83,7 +96,9 @@ export default function Hero() {
                           <span className="absolute -left-2.5 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-700">
                             {i + 1}
                           </span>
-                          <div className="text-sm text-slate-700">{s.title}</div>
+                          <div className="text-sm text-slate-700">
+                            {s.title}
+                          </div>
                           {"chips" in s && Array.isArray((s as any).chips) ? (
                             <div className="mt-1 flex flex-wrap gap-1.5">
                               {(s as any).chips.map((c: string) => (
@@ -119,9 +134,18 @@ export default function Hero() {
                   <div className="mt-3">
                     <ol className="space-y-4">
                       {[
-                        { title: "Enter @handle or channel URL", chips: ["IG", "TikTok", "YouTube"] },
-                        { title: "Scriptlyfy crawls and auto-transcribes latest videos" },
-                        { title: "Get 100 ready-to-use scripts + insights instantly" },
+                        {
+                          title: "Enter @handle or channel URL",
+                          chips: ["IG", "TikTok", "YouTube"],
+                        },
+                        {
+                          title:
+                            "Scriptlyfy crawls and auto-transcribes latest videos",
+                        },
+                        {
+                          title:
+                            "Get 100 ready-to-use scripts + insights instantly",
+                        },
                       ].map((s, i, arr) => (
                         <li
                           key={i}
@@ -130,7 +154,9 @@ export default function Hero() {
                           <span className="absolute -left-2.5 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-[10px] font-semibold text-white">
                             {i + 1}
                           </span>
-                          <div className="text-sm font-medium text-slate-800">{s.title}</div>
+                          <div className="text-sm font-medium text-slate-800">
+                            {s.title}
+                          </div>
                           {"chips" in s && Array.isArray((s as any).chips) ? (
                             <div className="mt-1 flex flex-wrap gap-1.5">
                               {(s as any).chips.map((c: string) => (
@@ -164,7 +190,7 @@ export default function Hero() {
                 </div>
               </div>
             </div>
-            <div className="absolute -right-8 -bottom-6 rotate-3 rounded-lg bg-white border border-slate-200 shadow-md shadow-slate-900/5 p-3 text-xs w-[220px]">
+            <div className="hidden md:block absolute -right-8 -bottom-6 rotate-3 rounded-lg bg-white border border-slate-200 shadow-md shadow-slate-900/5 p-3 text-xs w-[220px]">
               <div className="font-semibold text-slate-700">
                 Auto-detected Insights
               </div>

@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { loadFirebase } from "@/lib/deferredFirebase";
 import type { Firestore } from "firebase/firestore";
-import { loadAnalytics } from '@/lib/firebaseAnalytics';
-import { track } from '@/lib/events';
-import { getApps, getApp } from 'firebase/app';
-import { useEffect } from 'react';
+import { loadAnalytics } from "@/lib/firebaseAnalytics";
+import { track } from "@/lib/events";
+import { getApps, getApp } from "firebase/app";
+import { useEffect } from "react";
 
 const roles = [
   "Creator",
@@ -71,7 +71,13 @@ export default function LeadForm() {
   const utm = useMemo(() => {
     if (typeof window === "undefined") return {} as Record<string, string>;
     const p = new URLSearchParams(window.location.search);
-    const keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
+    const keys = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+    ] as const;
     const entries = keys
       .map((k) => [k, p.get(k)])
       .filter(([, v]) => v != null && v.trim() !== "");
@@ -85,7 +91,7 @@ export default function LeadForm() {
 
   const toggleContent = (c: string) => {
     setContentTypes((prev) =>
-      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c],
     );
   };
 
@@ -108,25 +114,38 @@ export default function LeadForm() {
     }
     try {
       const { db } = await loadFirebase();
-      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const { collection, addDoc, serverTimestamp } = await import(
+        "firebase/firestore"
+      );
       const sub = collection(db, "leads", normalizedEmail, "referrals");
       await addDoc(sub, {
         referralSource: referralSource || "unspecified",
         updatedAt: serverTimestamp(),
       });
       // Helpful for debugging if needed
-      console.log("Referral saved under:", `leads/${normalizedEmail}/referrals`);
+      console.log(
+        "Referral saved under:",
+        `leads/${normalizedEmail}/referrals`,
+      );
     } catch (e) {
       // Non-fatal; we don't block the UX on referral save
       console.warn("Referral save failed", e);
     }
-    track('referral_submit', { source: referralSource || 'unspecified' }, typeof window !== 'undefined' ? window.location.pathname : undefined);
+    track(
+      "referral_submit",
+      { source: referralSource || "unspecified" },
+      typeof window !== "undefined" ? window.location.pathname : undefined,
+    );
     setReferralSubmitted(true);
     setShowReferral(false);
   };
 
   const handleReferralSkip = () => {
-    track('referral_skip', undefined, typeof window !== 'undefined' ? window.location.pathname : undefined);
+    track(
+      "referral_skip",
+      undefined,
+      typeof window !== "undefined" ? window.location.pathname : undefined,
+    );
     setReferralSubmitted(true);
     setShowReferral(false);
   };
@@ -139,11 +158,13 @@ export default function LeadForm() {
     const normalizedEmail = email.trim().toLowerCase();
 
     // Simple duplicate prevention: use email as doc ID so only one doc per email exists
-  const { db } = await loadFirebase();
-  const { doc, getDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
-  const leadRef = doc(db, "leads", normalizedEmail);
+    const { db } = await loadFirebase();
+    const { doc, getDoc, setDoc, serverTimestamp } = await import(
+      "firebase/firestore"
+    );
+    const leadRef = doc(db, "leads", normalizedEmail);
     try {
-  const existing = await getDoc(leadRef);
+      const existing = await getDoc(leadRef);
       if (existing.exists()) {
         await minDelay;
         setLoading(false);
@@ -156,7 +177,8 @@ export default function LeadForm() {
     }
     const resolvedRole = role === "Other" ? roleOther.trim() : role;
     const resolvedUseCase = useCase === "Other" ? useCaseOther.trim() : useCase;
-    const resolvedChallenge = challenge === "Other" ? challengeOther.trim() : challenge;
+    const resolvedChallenge =
+      challenge === "Other" ? challengeOther.trim() : challenge;
     const resolvedCount = count === "Other" ? countOther.trim() : count;
 
     const metaRawBase = {
@@ -177,7 +199,8 @@ export default function LeadForm() {
     const metaRaw = metaRawBase;
     const pruneUndefined = (obj: any): any => {
       if (obj == null || typeof obj !== "object") return obj;
-      if (Array.isArray(obj)) return obj.map(pruneUndefined).filter((v) => v !== undefined);
+      if (Array.isArray(obj))
+        return obj.map(pruneUndefined).filter((v) => v !== undefined);
       const out: Record<string, any> = {};
       for (const [k, v] of Object.entries(obj)) {
         const pv = pruneUndefined(v);
@@ -188,28 +211,36 @@ export default function LeadForm() {
     const meta = pruneUndefined(metaRaw);
     try {
       await Promise.all([
-        setDoc(leadRef, {
-          ts: serverTimestamp(),
+        setDoc(
+          leadRef,
+          {
+            ts: serverTimestamp(),
+            role: resolvedRole,
+            useCase: resolvedUseCase,
+            challenge: resolvedChallenge,
+            count: resolvedCount,
+            email: normalizedEmail,
+            company,
+            meta,
+            ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+          },
+          { merge: false },
+        ),
+        minDelay,
+      ]);
+      // Track successful submission
+      track(
+        "lead_form_submit",
+        {
           role: resolvedRole,
           useCase: resolvedUseCase,
           challenge: resolvedChallenge,
           count: resolvedCount,
-          email: normalizedEmail,
-          company,
-          meta,
-          ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-        }, { merge: false }),
-        minDelay,
-      ]);
-      // Track successful submission
-      track('lead_form_submit', {
-        role: resolvedRole,
-        useCase: resolvedUseCase,
-        challenge: resolvedChallenge,
-        count: resolvedCount,
-        contentTypesLength: contentTypes.length,
-        hasCompany: !!company
-      }, typeof window !== 'undefined' ? window.location.pathname : undefined);
+          contentTypesLength: contentTypes.length,
+          hasCompany: !!company,
+        },
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+      );
 
       // Persist email locally so the referral step can still save even after a reload
       try {
@@ -217,18 +248,29 @@ export default function LeadForm() {
           window.localStorage.setItem("leadEmail", normalizedEmail);
         }
       } catch {}
-  setDone(true);
-  // Fire-and-forget deferred analytics load
-  try {
-    const a = getApps().length ? getApp() : undefined;
-    if (a) loadAnalytics(a);
-  } catch {}
+      setDone(true);
+      // Fire-and-forget deferred analytics load
+      try {
+        const a = getApps().length ? getApp() : undefined;
+        if (a) loadAnalytics(a);
+      } catch {}
     } catch (err) {
       console.error("Firestore setDoc failed:", err);
       await minDelay;
       setErrorMsg("Failed to submit. Please try again.");
     }
     setLoading(false);
+  };
+
+  const isMobile =
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width: 767px)").matches
+      : false;
+  const scrollIntoViewOnMobile = (el: HTMLElement | null) => {
+    if (!el || !isMobile) return;
+    try {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch {}
   };
 
   return (
@@ -245,7 +287,9 @@ export default function LeadForm() {
               className="sr-only absolute"
               tabIndex={-1}
               aria-hidden="true"
-              onFocus={() => { loadFirebase(); }}
+              onFocus={() => {
+                loadFirebase();
+              }}
             />
           )}
           {!done ? (
@@ -254,66 +298,97 @@ export default function LeadForm() {
                 <div>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label htmlFor="role-select" className="block text-sm font-medium text-slate-700">Who are you?</label>
+                      <label
+                        htmlFor="role-select"
+                        className="block text-sm font-medium text-slate-700"
+                      >
+                        Who are you?
+                      </label>
                       <select
                         id="role-select"
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                         className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                       >
                         {[...roles, "Other"].map((r) => (
-                          <option key={r} value={r}>{r}</option>
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
                         ))}
                       </select>
                       {role === "Other" && (
                         <input
                           id="role-other-input"
-                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                           placeholder="Tell us your role"
                           value={roleOther}
                           onChange={(e) => setRoleOther(e.target.value)}
+                          onFocus={(e) =>
+                            scrollIntoViewOnMobile(e.currentTarget)
+                          }
+                          enterKeyHint="next"
                         />
                       )}
                     </div>
                     <div>
-                      <label htmlFor="goal-select" className="block text-sm font-medium text-slate-700">Primary goal</label>
+                      <label
+                        htmlFor="goal-select"
+                        className="block text-sm font-medium text-slate-700"
+                      >
+                        Primary goal
+                      </label>
                       <select
                         id="goal-select"
                         value={useCase}
                         onChange={(e) => setUseCase(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                         className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                       >
                         {[...goals, "Other"].map((g) => (
-                          <option key={g} value={g}>{g}</option>
+                          <option key={g} value={g}>
+                            {g}
+                          </option>
                         ))}
                       </select>
                       {useCase === "Other" && (
                         <input
                           id="goal-other-input"
-                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                           placeholder="What's your goal?"
                           value={useCaseOther}
                           onChange={(e) => setUseCaseOther(e.target.value)}
+                          onFocus={(e) =>
+                            scrollIntoViewOnMobile(e.currentTarget)
+                          }
+                          enterKeyHint="next"
                         />
                       )}
                     </div>
                   </div>
                   <div className="mt-4 flex justify-end">
-                    <Button onClick={() => setStep(2)} className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">Next</Button>
+                    <Button
+                      onClick={() => setStep(2)}
+                      className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
               )}
 
               {step === 2 && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">What content types?</label>
+                  <label className="block text-sm font-medium text-slate-700">
+                    What content types?
+                  </label>
                   <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {contentOptions.map((opt) => (
                       <button
                         key={opt}
                         type="button"
                         onClick={() => toggleContent(opt)}
-                        className={`h-10 rounded-md border px-3 text-sm text-left ${contentTypes.includes(opt) ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/10" : "border-slate-300"}`}
+                        className={`h-11 rounded-md border px-3 text-sm text-left ${contentTypes.includes(opt) ? "border-[hsl(var(--brand))] bg-[hsl(var(--brand))]/10" : "border-slate-300"}`}
                       >
                         {opt}
                       </button>
@@ -321,46 +396,71 @@ export default function LeadForm() {
                   </div>
 
                   <div className="mt-4">
-                    <label htmlFor="challenge-select" className="block text-sm font-medium text-slate-700">What's your biggest content challenge?</label>
+                    <label
+                      htmlFor="challenge-select"
+                      className="block text-sm font-medium text-slate-700"
+                    >
+                      What's your biggest content challenge?
+                    </label>
                     <select
                       id="challenge-select"
                       value={challenge}
                       onChange={(e) => setChallenge(e.target.value)}
+                      onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                       className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                     >
                       {[...challenges, "Other"].map((c) => (
-                        <option key={c} value={c}>{c}</option>
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
                       ))}
                     </select>
                     {challenge === "Other" && (
                       <input
                         id="challenge-other-input"
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                         placeholder="Describe your challenge"
                         value={challengeOther}
                         onChange={(e) => setChallengeOther(e.target.value)}
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        enterKeyHint="next"
                       />
                     )}
                   </div>
 
                   <div className="mt-4 flex justify-between">
-                    <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-                    <Button onClick={() => setStep(3)} className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">Next</Button>
+                    <Button variant="outline" onClick={() => setStep(1)}>
+                      Back
+                    </Button>
+                    <Button
+                      onClick={() => setStep(3)}
+                      className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
               )}
 
               {step === 3 && (
                 <div>
-                  <label htmlFor="count-select" className="block text-sm font-medium text-slate-700">{countLabel}</label>
+                  <label
+                    htmlFor="count-select"
+                    className="block text-sm font-medium text-slate-700"
+                  >
+                    {countLabel}
+                  </label>
                   <select
                     id="count-select"
                     value={count}
                     onChange={(e) => setCount(e.target.value)}
+                    onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                     className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                   >
                     {[...sizeBuckets, "Other"].map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
                     ))}
                   </select>
                   {count === "Other" && (
@@ -374,19 +474,50 @@ export default function LeadForm() {
                   )}
 
                   <div className="mt-4">
-                    <label htmlFor="handle-or-website" className="block text-sm font-medium text-slate-700">{role === "Business/Brand" ? "Website" : "Primary handle"}</label>
+                    <label
+                      htmlFor="handle-or-website"
+                      className="block text-sm font-medium text-slate-700"
+                    >
+                      {role === "Business/Brand" ? "Website" : "Primary handle"}
+                    </label>
                     <input
                       id="handle-or-website"
+                      name={role === "Business/Brand" ? "url" : "handle"}
+                      inputMode={
+                        role === "Business/Brand"
+                          ? ("url" as const)
+                          : ("text" as const)
+                      }
+                      autoComplete={
+                        role === "Business/Brand" ? "url" : "username"
+                      }
+                      autoCapitalize={
+                        role === "Business/Brand" ? "none" : "none"
+                      }
+                      autoCorrect={role === "Business/Brand" ? "off" : "off"}
                       value={handleOrWebsite}
                       onChange={(e) => setHandleOrWebsite(e.target.value)}
-                      className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
-                      placeholder={role === "Business/Brand" ? "https://acme.com" : "@yourhandle"}
+                      onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                      className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                      placeholder={
+                        role === "Business/Brand"
+                          ? "https://acme.com"
+                          : "@yourhandle"
+                      }
+                      enterKeyHint="next"
                     />
                   </div>
 
                   <div className="mt-4 flex justify-between">
-                    <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-                    <Button onClick={() => setStep(4)} className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">Next</Button>
+                    <Button variant="outline" onClick={() => setStep(2)}>
+                      Back
+                    </Button>
+                    <Button
+                      onClick={() => setStep(4)}
+                      className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
               )}
@@ -395,35 +526,64 @@ export default function LeadForm() {
                 <div>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label htmlFor="email-input" className="block text-sm font-medium text-slate-700">Email</label>
+                      <label
+                        htmlFor="email-input"
+                        className="block text-sm font-medium text-slate-700"
+                      >
+                        Email
+                      </label>
                       <input
                         type="email"
+                        name="email"
+                        inputMode="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
                         required
                         pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                         id="email-input"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                         placeholder="you@company.com"
+                        enterKeyHint="next"
                       />
                       {email && !validEmail && (
-                        <p className="mt-1 text-xs text-red-600">Enter a valid email address</p>
+                        <p className="mt-1 text-xs text-red-600">
+                          Enter a valid email address
+                        </p>
                       )}
                     </div>
                     <div>
-                      <label htmlFor="company-input" className="block text-sm font-medium text-slate-700">Company (optional)</label>
+                      <label
+                        htmlFor="company-input"
+                        className="block text-sm font-medium text-slate-700"
+                      >
+                        Company (optional)
+                      </label>
                       <input
                         id="company-input"
+                        name="organization"
+                        autoComplete="organization"
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
                         placeholder="Acme Inc"
+                        enterKeyHint="done"
                       />
                     </div>
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <Button variant="outline" onClick={() => setStep(3)}>Back</Button>
-                    <Button onClick={onSubmit} disabled={loading || !validEmail} className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90">
+                    <Button variant="outline" onClick={() => setStep(3)}>
+                      Back
+                    </Button>
+                    <Button
+                      onClick={onSubmit}
+                      disabled={loading || !validEmail}
+                      className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
+                    >
                       {loading ? "Submitting…" : "Join Waitlist"}
                     </Button>
                   </div>
@@ -435,36 +595,55 @@ export default function LeadForm() {
             </div>
           ) : (
             <div className="mt-4">
-              <div className="text-lg font-semibold text-slate-900 mb-2">All set! You're on the waitlist.</div>
-              <div className="text-slate-700 mb-6">We'll email you when it's ready.</div>
-              
+              <div className="text-lg font-semibold text-slate-900 mb-2">
+                All set! You're on the waitlist.
+              </div>
+              <div className="text-slate-700 mb-6">
+                We'll email you when it's ready.
+              </div>
+
               {showReferral && !referralSubmitted && (
                 <div className="border-t border-slate-200 pt-6">
-                  <label htmlFor="referral-source-select" className="text-sm font-medium text-slate-700 mb-2 block">
+                  <label
+                    htmlFor="referral-source-select"
+                    className="text-sm font-medium text-slate-700 mb-2 block"
+                  >
                     Just curious, how did you hear about us?
                   </label>
-                  <p className="text-xs text-slate-500 mb-3">This helps us understand how people discover Scriptlyfy</p>
-                  <select 
+                  <p className="text-xs text-slate-500 mb-3">
+                    This helps us understand how people discover Scriptlyfy
+                  </p>
+                  <select
                     id="referral-source-select"
                     value={referralSource}
                     onChange={(e) => setReferralSource(e.target.value)}
                     className="w-full h-12 rounded-md border border-slate-300 px-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))] mb-4"
                   >
                     <option value="">Select an option (optional)</option>
-                    <option value="social">Social media (Twitter, LinkedIn, etc.)</option>
-                    <option value="search">Search engine (Google, Bing, etc.)</option>
+                    <option value="social">
+                      Social media (Twitter, LinkedIn, etc.)
+                    </option>
+                    <option value="search">
+                      Search engine (Google, Bing, etc.)
+                    </option>
                     <option value="referral">Word of mouth / Referral</option>
-                    <option value="influencer">Content creator / Influencer</option>
+                    <option value="influencer">
+                      Content creator / Influencer
+                    </option>
                     <option value="community">Online community / Forum</option>
                     <option value="newsletter">Newsletter / Blog</option>
                     <option value="ad">Advertisement</option>
                     <option value="other">Other</option>
                   </select>
                   <div className="flex gap-3">
-                    <Button variant="outline" className="text-slate-600" onClick={handleReferralSkip}>
+                    <Button
+                      variant="outline"
+                      className="text-slate-600"
+                      onClick={handleReferralSkip}
+                    >
                       Skip
                     </Button>
-                    <Button 
+                    <Button
                       className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
                       onClick={handleReferralSubmit}
                     >
@@ -473,18 +652,27 @@ export default function LeadForm() {
                   </div>
                 </div>
               )}
-              
+
               {referralSubmitted && (
-                <div className="text-center text-slate-600 text-sm border-t border-slate-200 pt-6" aria-live="polite">
+                <div
+                  className="text-center text-slate-600 text-sm border-t border-slate-200 pt-6"
+                  aria-live="polite"
+                >
                   Thanks for your feedback!
                 </div>
               )}
             </div>
           )}
           <div className="mt-6 grid sm:grid-cols-3 gap-4 text-sm text-slate-600">
-            <div className="rounded-lg border border-slate-200 p-3 text-left">Minutes not hours</div>
-            <div className="rounded-lg border border-slate-200 p-3 text-left">40x faster</div>
-            <div className="rounded-lg border border-slate-200 p-3 text-left">No spam. Just the launch.</div>
+            <div className="rounded-lg border border-slate-200 p-3 text-left">
+              Minutes not hours
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3 text-left">
+              40x faster
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3 text-left">
+              No spam. Just the launch.
+            </div>
           </div>
         </div>
       </div>
