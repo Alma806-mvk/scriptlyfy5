@@ -31,7 +31,12 @@ export function Header() {
           <img
             src="/logo-scriptlyfy.png"
             alt="Scriptlyfy"
+            width="32"
+            height="32"
+            sizes="32px"
             className="h-8 w-8 object-contain bg-transparent"
+            decoding="async"
+            fetchpriority="high"
           />
           <span className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">
             Scriptlyfy
