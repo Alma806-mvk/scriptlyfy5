@@ -1,6 +1,11 @@
 import { PropsWithChildren } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import { useEffect } from "react";
@@ -43,10 +48,34 @@ export function Header() {
           </span>
         </a>
         <nav className="hidden md:flex items-center gap-6">
-          <a href="/features" className={navLink} onClick={(e) => handleNav(e, "features")}>Features</a>
-          <a href="/demo" className={navLink} onClick={(e) => handleNav(e, "demo")}>Demo</a>
-          <a href="/pricing" className={navLink} onClick={(e) => handleNav(e, "pricing")}>Pricing</a>
-          <a href="/faq" className={navLink} onClick={(e) => handleNav(e, "faq")}>FAQs</a>
+          <a
+            href="/features"
+            className={navLink}
+            onClick={(e) => handleNav(e, "features")}
+          >
+            Features
+          </a>
+          <a
+            href="/demo"
+            className={navLink}
+            onClick={(e) => handleNav(e, "demo")}
+          >
+            Demo
+          </a>
+          <a
+            href="/pricing"
+            className={navLink}
+            onClick={(e) => handleNav(e, "pricing")}
+          >
+            Pricing
+          </a>
+          <a
+            href="/faq"
+            className={navLink}
+            onClick={(e) => handleNav(e, "faq")}
+          >
+            FAQs
+          </a>
         </nav>
         <div className="hidden md:flex items-center gap-3">
           <Button
@@ -59,7 +88,10 @@ export function Header() {
         {/* Mobile menu */}
         <Sheet>
           <SheetTrigger asChild>
-            <button className="md:hidden p-2 -m-2 rounded-md text-slate-700 hover:bg-slate-100 active:bg-slate-200" aria-label="Open menu">
+            <button
+              className="md:hidden p-2 -m-2 rounded-md text-slate-700 hover:bg-slate-100 active:bg-slate-200"
+              aria-label="Open menu"
+            >
               <Menu className="h-6 w-6" />
             </button>
           </SheetTrigger>
@@ -68,28 +100,55 @@ export function Header() {
               <ul className="space-y-1">
                 <li>
                   <SheetClose asChild>
-                    <a href="/features" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "features")}>Features</a>
+                    <a
+                      href="/features"
+                      className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
+                      onClick={(e) => handleNav(e, "features")}
+                    >
+                      Features
+                    </a>
                   </SheetClose>
                 </li>
                 <li>
                   <SheetClose asChild>
-                    <a href="/demo" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "demo")}>Demo</a>
+                    <a
+                      href="/demo"
+                      className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
+                      onClick={(e) => handleNav(e, "demo")}
+                    >
+                      Demo
+                    </a>
                   </SheetClose>
                 </li>
                 <li>
                   <SheetClose asChild>
-                    <a href="/pricing" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "pricing")}>Pricing</a>
+                    <a
+                      href="/pricing"
+                      className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
+                      onClick={(e) => handleNav(e, "pricing")}
+                    >
+                      Pricing
+                    </a>
                   </SheetClose>
                 </li>
                 <li>
                   <SheetClose asChild>
-                    <a href="/faq" className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100" onClick={(e) => handleNav(e, "faq")}>FAQs</a>
+                    <a
+                      href="/faq"
+                      className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
+                      onClick={(e) => handleNav(e, "faq")}
+                    >
+                      FAQs
+                    </a>
                   </SheetClose>
                 </li>
               </ul>
               <div className="mt-4">
                 <SheetClose asChild>
-                  <Button className="w-full bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90" onClick={() => scrollToSection("signup")}>
+                  <Button
+                    className="w-full bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
+                    onClick={() => scrollToSection("signup")}
+                  >
                     Join Early Access
                   </Button>
                 </SheetClose>
