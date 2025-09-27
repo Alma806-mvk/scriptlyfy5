@@ -89,10 +89,13 @@ export default function InlineHeroLeadCapture() {
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="email"
+            inputMode="email"
+            autoComplete="email"
+            enterKeyHint="go"
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="you@company.com"
-            className="flex-1 h-12 rounded-md border border-slate-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+            className="flex-1 h-12 rounded-md border border-slate-300 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
             aria-label="Email address"
             onFocus={() => { loadFirebase(); }}
           />
