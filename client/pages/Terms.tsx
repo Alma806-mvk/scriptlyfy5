@@ -2,7 +2,7 @@ import SEO from "@/components/SEO";
 import React from "react";
 
 // Support email constant for easy future updates
-const SUPPORT_EMAIL = "creategenstudio@gmail.com";
+const SUPPORT_EMAIL = "emma@scriptlyfy.com";
 const CANONICAL = "https://scriptlyfy.com/terms";
 const UPDATED = new Date().toISOString().slice(0, 10);
 

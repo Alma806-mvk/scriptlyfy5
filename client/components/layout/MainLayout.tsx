@@ -77,6 +77,7 @@ export function Header() {
             sizes="32px"
             className="h-8 w-8 object-contain bg-transparent"
             decoding="async"
+            fetchPriority="high"
           />
           <span className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">
             Scriptlyfy
@@ -344,7 +345,7 @@ export function Footer() {
           <ul className="mt-3 space-y-2 text-slate-600">
             <li>
               <a
-                href="mailto:creategenstudio@gmail.com"
+                href="mailto:emma@scriptlyfy.com"
                 className="hover:text-slate-900"
               >
                 Email support

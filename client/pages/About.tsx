@@ -4,7 +4,7 @@ import React from 'react';
 
 const CANONICAL = 'https://scriptlyfy.com/about';
 const UPDATED = new Date().toISOString().slice(0,10);
-const SUPPORT_EMAIL = 'creategenstudio@gmail.com';
+const SUPPORT_EMAIL = 'emma@scriptlyfy.com';
 
 // Lightweight in‑page nav (horizontal pills instead of sidebar TOC)
 const nav: { id: string; label: string; }[] = [

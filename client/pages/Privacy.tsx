@@ -1,7 +1,7 @@
 import SEO from "@/components/SEO";
 import React from "react";
 
-const SUPPORT_EMAIL = "creategenstudio@gmail.com";
+const SUPPORT_EMAIL = "emma@scriptlyfy.com";
 const CANONICAL = "https://scriptlyfy.com/privacy";
 const UPDATED = new Date().toISOString().slice(0, 10);
 
