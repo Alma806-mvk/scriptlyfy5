@@ -38,7 +38,12 @@ const contentOptions = [
   "Podcasts",
 ];
 
-export default function LeadForm() {
+export default function LeadForm({ alreadyOnList = false }: { alreadyOnList?: boolean } = {}) {
+  const qp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  if (!alreadyOnList && qp?.get('alreadyOnList') === '1') {
+    alreadyOnList = true;
+  }
+
   const [step, setStep] = useState(1);
 
   const [role, setRole] = useState<string>(roles[0]);
@@ -150,36 +155,41 @@ export default function LeadForm() {
     setShowReferral(false);
   };
 
+  // Preload email from localStorage or query param when alreadyOnList so we have it for details write
+  useEffect(() => {
+    if (!alreadyOnList) return;
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = window.localStorage.getItem('leadEmail');
+      const qpEmail = qp?.get('e');
+      const chosen = (stored || qpEmail || '').trim().toLowerCase();
+      if (chosen) {
+        // Keep in state (even though we don't show the field) so we can debug easier if needed
+        setEmail(chosen);
+      }
+    } catch {}
+  }, [alreadyOnList]);
+
   const onSubmit = async () => {
-    if (!validEmail) return;
+    if (!validEmail && !alreadyOnList) return;
     setErrorMsg("");
     setLoading(true);
-    const minDelay = sleep(700); // small UX delay
-    const normalizedEmail = email.trim().toLowerCase();
-
-    // Simple duplicate prevention: use email as doc ID so only one doc per email exists
-    const { db } = await loadFirebase();
-    const { doc, getDoc, setDoc, serverTimestamp } = await import(
-      "firebase/firestore"
-    );
-    const leadRef = doc(db, "leads", normalizedEmail);
-    try {
-      const existing = await getDoc(leadRef);
-      if (existing.exists()) {
-        await minDelay;
-        setLoading(false);
-        setErrorMsg("This email is already on the waitlist.");
-        return;
-      }
-    } catch (e) {
-      // If read fails (offline or rules), fall through and try to create
-      // We will catch write errors below and show a friendly message
+    const minDelay = sleep(700);
+    const normalizedEmail = alreadyOnList
+      ? (() => {
+          if (typeof window === 'undefined') return '';
+          try {
+            const stored = window.localStorage.getItem('leadEmail') || '';
+            const qpEmail = qp?.get('e') || '';
+            return (stored || qpEmail || email || '').trim().toLowerCase();
+          } catch { return (email||'').trim().toLowerCase(); }
+        })()
+      : email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setLoading(false);
+      setErrorMsg("Email missing – refresh and submit the hero form first.");
+      return;
     }
-    const resolvedRole = role === "Other" ? roleOther.trim() : role;
-    const resolvedUseCase = useCase === "Other" ? useCaseOther.trim() : useCase;
-    const resolvedChallenge =
-      challenge === "Other" ? challengeOther.trim() : challenge;
-    const resolvedCount = count === "Other" ? countOther.trim() : count;
 
     const metaRawBase = {
       roleSelection: role,
@@ -195,40 +205,120 @@ export default function LeadForm() {
       referrer: typeof document !== "undefined" ? document.referrer : "",
       path: typeof window !== "undefined" ? window.location.pathname : "",
     };
-    // To unblock Firestore writes, omit UTM from persisted meta for now.
-    const metaRaw = metaRawBase;
+    // Derive resolved fields (duplicated after earlier patch to ensure scope correctness)
+    const resolvedRole = role === "Other" ? roleOther.trim() : role;
+    const resolvedUseCase = useCase === "Other" ? useCaseOther.trim() : useCase;
+    const resolvedChallenge = challenge === "Other" ? challengeOther.trim() : challenge;
+    const resolvedCount = count === "Other" ? countOther.trim() : count;
     const pruneUndefined = (obj: any): any => {
       if (obj == null || typeof obj !== "object") return obj;
-      if (Array.isArray(obj))
-        return obj.map(pruneUndefined).filter((v) => v !== undefined);
+      if (Array.isArray(obj)) return obj.map(pruneUndefined).filter(v => v !== undefined);
       const out: Record<string, any> = {};
-      for (const [k, v] of Object.entries(obj)) {
+      for (const [k,v] of Object.entries(obj)) {
         const pv = pruneUndefined(v);
         if (pv !== undefined) out[k] = pv;
       }
       return out;
     };
-    const meta = pruneUndefined(metaRaw);
+    const meta = pruneUndefined(metaRawBase);
+
+    const { db } = await loadFirebase();
+  const { doc, setDoc, serverTimestamp, collection } = await import("firebase/firestore");
+    const leadRef = doc(db, "leads", normalizedEmail);
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[lead-form] submit start', { alreadyOnList, normalizedEmail, resolvedRole, resolvedUseCase, resolvedChallenge, resolvedCount, contentTypes });
+    }
     try {
-      await Promise.all([
-        setDoc(
-          leadRef,
-          {
+
+      if (!alreadyOnList) {
+        // create lead normally
+        await Promise.all([
+          setDoc(
+            leadRef,
+            {
+              ts: serverTimestamp(),
+              role: resolvedRole,
+              useCase: resolvedUseCase,
+              challenge: resolvedChallenge,
+              count: resolvedCount,
+              email: normalizedEmail,
+              company,
+              meta,
+              ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
+            },
+            { merge: false },
+          ),
+          minDelay,
+        ]);
+        // Also persist a details snapshot capturing the answers (stage: research_answers)
+        try {
+          const pathNow = typeof window !== 'undefined' ? window.location.pathname : '';
+          const uaNow = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+          const payload = {
             ts: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            stage: "research_answers",
             role: resolvedRole,
             useCase: resolvedUseCase,
             challenge: resolvedChallenge,
             count: resolvedCount,
-            email: normalizedEmail,
-            company,
+            contentTypes,
+            handleOrWebsite,
+            ...(company ? { company } : {}),
             meta,
-            ua: typeof navigator !== "undefined" ? navigator.userAgent : "",
-          },
-          { merge: false },
-        ),
-        minDelay,
-      ]);
-      // Track successful submission
+            source: "initial-form",
+            path: pathNow,
+            ua: uaNow,
+            answersVersion: 1,
+            deterministic: true,
+          };
+          const detailsAnswersRef = doc(collection(db, "leads", normalizedEmail, "details"), 'answers');
+          console.log('[lead-form] attempting setDoc answers (new lead)', { email: normalizedEmail });
+          track('answers_attempt', { alreadyOnList: false }, pathNow);
+          await setDoc(detailsAnswersRef, payload, { merge: false });
+          console.log('[lead-form] details answers setDoc success (new lead)', { email: normalizedEmail, payload });
+          track('answers_success', { alreadyOnList: false }, pathNow);
+        } catch (e) {
+          console.warn("Details save (new lead) failed", e);
+          track('answers_error', { alreadyOnList: false, message: (e as any)?.message || 'unknown' }, typeof window !== 'undefined' ? window.location.pathname : undefined);
+        }
+      } else {
+        // already on list: persist full research / enrichment answers in details subcollection
+        const extraFeedback = challengeOther.trim();
+        const detailsPayload: Record<string, any> = {
+          ts: serverTimestamp(),
+          stage: "research_answers",
+          role: resolvedRole,
+          useCase: resolvedUseCase,
+          challenge: resolvedChallenge,
+          count: resolvedCount,
+          contentTypes,
+          handleOrWebsite,
+          ...(company ? { company } : {}),
+          meta,
+          source: "research-followup",
+          ...(extraFeedback ? { feedback: extraFeedback } : {}),
+          path: typeof window !== 'undefined' ? window.location.pathname : '',
+          ua: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+          answersVersion: 1,
+        };
+        try {
+          const detailsAnswersRef = doc(collection(db, "leads", normalizedEmail, "details"), 'answers');
+          detailsPayload.updatedAt = serverTimestamp();
+          detailsPayload.deterministic = true;
+          console.log('[lead-form] attempting setDoc answers (existing lead)', { email: normalizedEmail });
+          track('answers_attempt', { alreadyOnList: true }, typeof window !== 'undefined' ? window.location.pathname : undefined);
+          await setDoc(detailsAnswersRef, detailsPayload, { merge: false });
+          console.log('[lead-form] details answers setDoc success (existing lead)', { email: normalizedEmail, detailsPayload });
+          track('answers_success', { alreadyOnList: true }, typeof window !== 'undefined' ? window.location.pathname : undefined);
+        } catch (e) {
+          console.warn("Details save (existing lead) failed", e);
+          track('answers_error', { alreadyOnList: true, message: (e as any)?.message || 'unknown' }, typeof window !== 'undefined' ? window.location.pathname : undefined);
+        }
+        await minDelay;
+      }
+
       track(
         "lead_form_submit",
         {
@@ -238,24 +328,23 @@ export default function LeadForm() {
           count: resolvedCount,
           contentTypesLength: contentTypes.length,
           hasCompany: !!company,
+          alreadyOnList,
         },
         typeof window !== "undefined" ? window.location.pathname : undefined,
       );
 
-      // Persist email locally so the referral step can still save even after a reload
       try {
         if (typeof window !== "undefined") {
           window.localStorage.setItem("leadEmail", normalizedEmail);
         }
       } catch {}
       setDone(true);
-      // Fire-and-forget deferred analytics load
       try {
         const a = getApps().length ? getApp() : undefined;
         if (a) loadAnalytics(a);
       } catch {}
     } catch (err) {
-      console.error("Firestore setDoc failed:", err);
+      console.error("Submission failed:", err);
       await minDelay;
       setErrorMsg("Failed to submit. Please try again.");
     }
@@ -483,27 +572,15 @@ export default function LeadForm() {
                     <input
                       id="handle-or-website"
                       name={role === "Business/Brand" ? "url" : "handle"}
-                      inputMode={
-                        role === "Business/Brand"
-                          ? ("url" as const)
-                          : ("text" as const)
-                      }
-                      autoComplete={
-                        role === "Business/Brand" ? "url" : "username"
-                      }
-                      autoCapitalize={
-                        role === "Business/Brand" ? "none" : "none"
-                      }
-                      autoCorrect={role === "Business/Brand" ? "off" : "off"}
+                      inputMode={role === "Business/Brand" ? ("url" as const) : ("text" as const)}
+                      autoComplete={role === "Business/Brand" ? "url" : "username"}
+                      autoCapitalize="none"
+                      autoCorrect="off"
                       value={handleOrWebsite}
                       onChange={(e) => setHandleOrWebsite(e.target.value)}
                       onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
                       className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
-                      placeholder={
-                        role === "Business/Brand"
-                          ? "https://acme.com"
-                          : "@yourhandle"
-                      }
+                      placeholder={role === "Business/Brand" ? "https://acme.com" : "@yourhandle"}
                       enterKeyHint="next"
                     />
                   </div>
@@ -524,67 +601,76 @@ export default function LeadForm() {
 
               {step === 4 && (
                 <div>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div>
-                      <label
-                        htmlFor="email-input"
-                        className="block text-sm font-medium text-slate-700"
-                      >
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        inputMode="email"
-                        autoComplete="email"
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                        required
-                        pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-                        id="email-input"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
-                        placeholder="you@company.com"
-                        enterKeyHint="next"
-                      />
-                      {email && !validEmail && (
-                        <p className="mt-1 text-xs text-red-600">
-                          Enter a valid email address
-                        </p>
-                      )}
+                  {!alreadyOnList && (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div>
+                        <label
+                          htmlFor="email-input"
+                          className="block text-sm font-medium text-slate-700"
+                        >
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          inputMode="email"
+                          autoComplete="email"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          required
+                          pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                          id="email-input"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                          placeholder="you@company.com"
+                          enterKeyHint="next"
+                        />
+                        {email && !validEmail && (
+                          <p className="mt-1 text-xs text-red-600">
+                            Enter a valid email address
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="company-input"
+                          className="block text-sm font-medium text-slate-700"
+                        >
+                          Company (optional)
+                        </label>
+                        <input
+                          id="company-input"
+                          name="organization"
+                          autoComplete="organization"
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                          onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
+                          className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
+                          placeholder="Acme Inc"
+                          enterKeyHint="done"
+                        />
+                      </div>
                     </div>
+                  )}
+                  {alreadyOnList && (
                     <div>
-                      <label
-                        htmlFor="company-input"
-                        className="block text-sm font-medium text-slate-700"
-                      >
-                        Company (optional)
-                      </label>
-                      <input
-                        id="company-input"
-                        name="organization"
-                        autoComplete="organization"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        onFocus={(e) => scrollIntoViewOnMobile(e.currentTarget)}
-                        className="mt-2 w-full h-12 rounded-md border border-slate-300 px-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]"
-                        placeholder="Acme Inc"
-                        enterKeyHint="done"
-                      />
+                      <label className="block text-sm font-medium text-slate-700" htmlFor="extra-feedback-input">Until launch, want to help us focus? (Optional feedback)</label>
+                      <textarea id="extra-feedback-input" rows={4} className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand))]" placeholder="Share a workflow pain, a must-have feature, or a competitor frustration..." value={challengeOther} onChange={(e)=> setChallengeOther(e.target.value)} />
+                      <p className="mt-2 text-xs text-slate-500">You already joined via the hero form – this just gives us sharper build signals.</p>
                     </div>
-                  </div>
+                  )}
                   <div className="mt-4 flex justify-between">
                     <Button variant="outline" onClick={() => setStep(3)}>
                       Back
                     </Button>
                     <Button
                       onClick={onSubmit}
-                      disabled={loading || !validEmail}
+                      disabled={loading || (!validEmail && !alreadyOnList)}
                       className="bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand))]/90"
                     >
-                      {loading ? "Submitting…" : "Join Waitlist"}
+                      {loading ? "Submitting…" : alreadyOnList ? "Submit" : "Join Waitlist"}
                     </Button>
                   </div>
                   {errorMsg && (

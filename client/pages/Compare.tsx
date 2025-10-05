@@ -5,6 +5,7 @@ import { LastUpdated, getIsoDateModified } from "@/lib/contentMeta.tsx";
 import InlineHeroLeadCapture from "@/components/landing/InlineHeroLeadCapture";
 import { LogoStrip } from "@/components/landing/social/LogoStrip";
 import { Testimonials } from "@/components/landing/social/Testimonials";
+import HorizontalScrollShadow from "@/components/ui/HorizontalScrollShadow";
 
 // NOTE: Keep content conversion-focused: pain points, differentiators, social proof placeholder.
 
@@ -174,8 +175,8 @@ export default function Compare() {
         {FEATURES.map(block => (
           <div key={block.category}>
             <h2 className="text-2xl font-semibold mb-4">{block.category}</h2>
-            <div className="overflow-x-auto rounded-md border">
-              <table className="w-full text-sm">
+            <HorizontalScrollShadow instructions="Scroll horizontally to compare all columns" className="mt-2">
+              <table className="w-full text-sm min-w-[640px]">
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="px-4 py-2 text-left w-1/2">Feature</th>
@@ -228,7 +229,7 @@ export default function Compare() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </HorizontalScrollShadow>
           </div>
         ))}
       </section>

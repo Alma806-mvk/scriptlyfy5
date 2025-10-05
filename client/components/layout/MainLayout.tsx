@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,8 +20,44 @@ export const scrollToSection = (sectionId: string, push: boolean = true) => {
 };
 
 export function Header() {
+  // Track currently visible section for highlighting nav links
+  const [active, setActive] = useState<string>("");
+  // Control sheet open state to add aria-expanded + body scroll lock
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden"; // prevent background scroll when menu open
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sectionIds = ["features", "demo", "pricing", "faq", "signup"];
+    const els = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => !!el);
+    if (!('IntersectionObserver' in window) || els.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            if (id) setActive(id);
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const navLink =
-    "text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors";
+    "text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand))] focus-visible:ring-offset-2 rounded";
   const handleNav = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
     id: string,
@@ -41,38 +77,61 @@ export function Header() {
             sizes="32px"
             className="h-8 w-8 object-contain bg-transparent"
             decoding="async"
-            fetchpriority="high"
           />
           <span className="text-base sm:text-lg font-semibold tracking-tight text-slate-900">
             Scriptlyfy
           </span>
         </a>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-6" aria-label="Primary">
           <a
             href="/features"
-            className={navLink}
+            className={cn(
+              navLink,
+              active === "features"
+                ? "text-slate-900"
+                : "text-slate-600 hover:text-slate-900",
+            )}
             onClick={(e) => handleNav(e, "features")}
+            aria-current={active === "features" ? "true" : undefined}
           >
             Features
           </a>
           <a
             href="/demo"
-            className={navLink}
+            className={cn(
+              navLink,
+              active === "demo"
+                ? "text-slate-900"
+                : "text-slate-600 hover:text-slate-900",
+            )}
             onClick={(e) => handleNav(e, "demo")}
+            aria-current={active === "demo" ? "true" : undefined}
           >
             Demo
           </a>
           <a
             href="/pricing"
-            className={navLink}
+            className={cn(
+              navLink,
+              active === "pricing"
+                ? "text-slate-900"
+                : "text-slate-600 hover:text-slate-900",
+            )}
             onClick={(e) => handleNav(e, "pricing")}
+            aria-current={active === "pricing" ? "true" : undefined}
           >
             Pricing
           </a>
           <a
             href="/faq"
-            className={navLink}
+            className={cn(
+              navLink,
+              active === "faq"
+                ? "text-slate-900"
+                : "text-slate-600 hover:text-slate-900",
+            )}
             onClick={(e) => handleNav(e, "faq")}
+            aria-current={active === "faq" ? "true" : undefined}
           >
             FAQs
           </a>
@@ -86,24 +145,28 @@ export function Header() {
           </Button>
         </div>
         {/* Mobile menu */}
-        <Sheet>
+        <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <button
-              className="md:hidden p-2 -m-2 rounded-md text-slate-700 hover:bg-slate-100 active:bg-slate-200"
-              aria-label="Open menu"
+              className="md:hidden p-2 -m-2 rounded-md text-slate-700 hover:bg-slate-100 active:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand))]"
+              aria-label="Menu"
             >
               <Menu className="h-6 w-6" />
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-5/6 max-w-xs p-0">
-            <nav className="px-5 pt-14 pb-6">
+          <SheetContent side="right" className="w-5/6 max-w-xs p-0" id="mobile-primary-nav" aria-label="Mobile primary">
+            <nav className="px-5 pt-14 pb-6" role="navigation">
               <ul className="space-y-1">
                 <li>
                   <SheetClose asChild>
                     <a
                       href="/features"
                       className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={(e) => handleNav(e, "features")}
+                      onClick={(e) => {
+                        handleNav(e, "features");
+                        setOpen(false);
+                      }}
+                      aria-current={active === "features" ? "true" : undefined}
                     >
                       Features
                     </a>
@@ -114,7 +177,11 @@ export function Header() {
                     <a
                       href="/demo"
                       className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={(e) => handleNav(e, "demo")}
+                      onClick={(e) => {
+                        handleNav(e, "demo");
+                        setOpen(false);
+                      }}
+                      aria-current={active === "demo" ? "true" : undefined}
                     >
                       Demo
                     </a>
@@ -125,7 +192,11 @@ export function Header() {
                     <a
                       href="/pricing"
                       className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={(e) => handleNav(e, "pricing")}
+                      onClick={(e) => {
+                        handleNav(e, "pricing");
+                        setOpen(false);
+                      }}
+                      aria-current={active === "pricing" ? "true" : undefined}
                     >
                       Pricing
                     </a>
@@ -136,7 +207,11 @@ export function Header() {
                     <a
                       href="/faq"
                       className="block rounded-md px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={(e) => handleNav(e, "faq")}
+                      onClick={(e) => {
+                        handleNav(e, "faq");
+                        setOpen(false);
+                      }}
+                      aria-current={active === "faq" ? "true" : undefined}
                     >
                       FAQs
                     </a>

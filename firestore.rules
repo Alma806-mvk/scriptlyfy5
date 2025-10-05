@@ -8,8 +8,40 @@ service cloud.firestore {
       allow create: if request.resource.data.email == email
                     && !exists(/databases/$(database)/documents/leads/$(email));
 
-      // Optional: block updates/deletes from clients (server-only if ever needed)
-      allow update, delete: if false;
+      // Allow a constrained update that only adds enrichment fields not present at creation.
+      // We still block deletes.
+      allow delete: if false;
+      allow update: if
+        // Never allow changing the primary key email
+        request.resource.data.email == resource.data.email
+        // Disallow removing original creation fields
+        && resource.data.keys().hasAll(['ts','email'])
+        // Fields that may be added (or kept) after initial create
+        && request.resource.data.keys().hasOnly(['ts','email','role','useCase','challenge','count','company','meta','ua'])
+        // Do not allow changing original ts or ua retroactively
+        && request.resource.data.ts == resource.data.ts
+        && request.resource.data.ua == resource.data.ua
+        // Allow adding new enrichment fields (role/useCase/etc.) only if they were not already set or remain identical
+        && (
+            (!('role' in resource.data) || request.resource.data.role == resource.data.role) || (!('role' in resource.data) && ('role' in request.resource.data))
+          )
+        && (
+            (!('useCase' in resource.data) || request.resource.data.useCase == resource.data.useCase) || (!('useCase' in resource.data) && ('useCase' in request.resource.data))
+          )
+        && (
+            (!('challenge' in resource.data) || request.resource.data.challenge == resource.data.challenge) || (!('challenge' in resource.data) && ('challenge' in request.resource.data))
+          )
+        && (
+            (!('count' in resource.data) || request.resource.data.count == resource.data.count) || (!('count' in resource.data) && ('count' in request.resource.data))
+          )
+        // Company can be added or stay same
+        && (
+            (!('company' in resource.data) || request.resource.data.company == resource.data.company) || (!('company' in resource.data) && ('company' in request.resource.data))
+          )
+        // meta can be added once; if present must remain identical
+        && (
+            (!('meta' in resource.data) || request.resource.data.meta == resource.data.meta) || (!('meta' in resource.data) && ('meta' in request.resource.data))
+          );
 
       // Keep private (no reads from client). If you need reads, set a proper condition or true.
       allow read: if false;
@@ -17,6 +49,14 @@ service cloud.firestore {
       // Subcollection for referral answers
       match /referrals/{refId} {
         // Allow adding a referral record if parent lead exists
+        allow create: if exists(/databases/$(database)/documents/leads/$(email));
+        allow read, update, delete: if false;
+      }
+
+      // Subcollection for post-capture detailed survey answers / research enrichments
+      // We keep this separate instead of allowing update on the main lead doc to preserve
+      // immutability of the original minimal record and simplify security logic.
+      match /details/{detailId} {
         allow create: if exists(/databases/$(database)/documents/leads/$(email));
         allow read, update, delete: if false;
       }
